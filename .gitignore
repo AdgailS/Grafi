@@ -1,1 +1,3 @@
-.entornos
+.entornos/
+__pycache__/
+*.pyc
