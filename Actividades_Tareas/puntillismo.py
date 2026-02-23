@@ -7,11 +7,11 @@ img = np.ones((500, 500, 3),  dtype=np.uint8)*255
 
 #Varios circulos (centro y petalos)
 circulos = [
-    {"centro": (250, 250), "radio": 60, "color": [0, 100, 200]},  # Café
-    {"centro": (310, 170), "radio": 70, "color": [0, 0, 255]},    # Rojo
-    {"centro": (310, 290), "radio": 70, "color": [0, 0, 255]},    
-    {"centro": (180, 290), "radio": 70, "color": [0, 0, 255]},    
-    {"centro": (180, 170), "radio": 70, "color": [0, 0, 255]},    
+    {"centro": (250, 250), "radio": 50, "color": [0, 100, 200]},  # Café
+    {"centro": (300, 185), "radio": 60, "color": [0, 0, 255]},    # Rojo
+    {"centro": (300, 300), "radio": 60, "color": [0, 0, 255]},    
+    {"centro": (200, 300), "radio": 60, "color": [0, 0, 255]},    
+    {"centro": (200, 185), "radio": 60, "color": [0, 0, 255]},    
 ]
 
 for fila in range(500):
