@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Leer la imagen
-img = cv2.imread('frutas.png')
+img = cv2.imread('Imagenes/frutas.png')
 
 # Convertir la imagen al espacio de color HSV
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)

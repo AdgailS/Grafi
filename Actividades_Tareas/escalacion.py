@@ -1,8 +1,10 @@
+import math
+
 import cv2 as cv
 import numpy as np
 
 # Cargar la imagen en escala de grises
-img = cv.imread('tr.png', 0)
+img = cv.imread('Imagenes/tortuga.jpg', 0)
 
 # Obtener el tamaño de la imagen
 x, y = img.shape
@@ -21,7 +23,7 @@ for i in range(x):
         if 0 <= new_x < x and 0 <= new_y < y:
             translated_img[new_x, new_y] = img[i, j]
             
-xx, yy = rotated_img.shape
+xx, yy = rotated_img.shape # type: ignore
 # Calcular el centro de la imagen
 cx, cy = int(x  // 2), int(y  // 2)
 
@@ -35,7 +37,7 @@ for i in range(x):
         new_x = int((j - cx) * math.cos(theta) - (i - cy) * math.sin(theta) + cx)
         new_y = int((j - cx) * math.sin(theta) + (i - cy) * math.cos(theta) + cy)
         if 0 <= new_x < y and 0 <= new_y < x:
-            rotated_img[new_y, new_x] = img[i, j]
+            rotated_img[new_y, new_x] = img[i, j] # type: ignore
 
 # Mostrar la imagen original y la trasladada
 cv.imshow('Imagen Original', img)
