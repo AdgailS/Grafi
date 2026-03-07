@@ -105,6 +105,41 @@ while True:
         y = int(center_y + r * np.sin(t))
         cv2.circle(img, (x, y), 2, (0, 255, 255), -1)
 ```
+
+### Tarea 5. Ping Pong 
+La idea del ejercicio era hacer que la pelota se mueva en (x,y) y que cuando se toque una pared se invierta la dirección para dar la ilusión de que rebota.
+Primero definí la posicion inicial para que sea el centro (x,y), la velocidad para cada uno (dx,dy) y el tamaño de la pelota
+```
+x = 250
+y = 250
+
+dx = 4
+dy = 3
+
+radio = 20
+
+```
+Despues para el rebote hice dx =  dx para horizontal y  dy = −dy para vertical y los puse dentro de los if que sirven para saber cuando la pelota llega a uno de los bordes. 
+```
+while True:
+
+    img = np.ones((height, width, 3), np.uint8) * 255
+
+    cv.circle(img, (x, y), radio, (0, 0, 255), -1)
+
+    x = x + dx
+    y = y + dy
+
+    if x + radio >= width or x - radio <= 0:
+        dx = -dx
+
+    if y + radio >= height or y - radio <= 0:
+        dy = -dy
+
+    cv.imshow("Ping Pong", img)
+```
+
+
 ### Tarea 5. Filtro con nariz, orejas, cejas y bigote 
 
 En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo distintos elemtos para cada parte de la cara que queriá representar, usando lineas para las cejas, una elipse completa (-1) para la nariz, dos rin relleno para el bigote y otras dos rellenas para las orejas.
@@ -121,4 +156,5 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
         cv.ellipse(img, (x - 15, y + int(h*0.5)), (25,40), 0, 0, 360, (150,180,255), -1)
         # OREJA DERECHA
         cv.ellipse(img, (x + w + 15, y + int(h*0.5)), (25,40), 0, 0, 360, (150,180,255), -1)
-        ```
+```
+

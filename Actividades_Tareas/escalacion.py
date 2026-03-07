@@ -3,29 +3,41 @@ import math
 import cv2 as cv
 import numpy as np
 
-# Cargar la imagen en escala de grises
 img = cv.imread('Imagenes/tortuga.jpg', 0)
 
-# Obtener el tamaño de la imagen
 x, y = img.shape
 
-# Crear una imagen vacía para la traslación
 translated_img = np.zeros((x, y), dtype=np.uint8)
 
 # Definir el desplazamiento en x e y
-dx, dy = 100, 50
+dx, dy = 20, 20
 
 # Trasladar la imagen
 for i in range(x):
     for j in range(y):
-        new_x = i + 20
-        new_y = j + 30
+        new_x = i + dx
+        new_y = j + dy
         if 0 <= new_x < x and 0 <= new_y < y:
             translated_img[new_x, new_y] = img[i, j]
-            
-xx, yy = rotated_img.shape # type: ignore
-# Calcular el centro de la imagen
+         
+xx, yy = rotated_img.shape    #//////////////////////////////////////7
 cx, cy = int(x  // 2), int(y  // 2)
+
+scale = 1/5
+
+# Escalar a 1/5
+scaled_x = int(x * scale)
+scaled_y = int(y * scale)
+
+scaled_img = np.zeros((scaled_x, scaled_y), dtype=np.uint8)
+
+for i in range(scaled_x):
+    for j in range(scaled_y):
+        orig_x = int(i / scale)
+        orig_y = int(j / scale)
+
+        if orig_x < x and orig_y < y:
+            scaled_img[i, j] = translated_img[orig_x, orig_y]
 
 # Definir el ángulo de rotación (en grados) y convertirlo a radianes
 angle = 45

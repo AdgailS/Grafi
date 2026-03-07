@@ -1,15 +1,40 @@
 import cv2 as cv
-import numpy as np 
+import numpy as np
 
-img = np.ones((500,500), np.uint8)*255
+width, height = 500, 500
 
-for i in range (400):
-    cv.circle(img, (i,i), 20, (i, 0, 0), -1) # las i hacen que vaya en linea
-    #MODIFICAR EL CICLO, HACER SUMAS Y RESTAS A i
-    cv.imshow('img', img)
-    img = np.ones((500,500,3), np.uint8) *150
-    cv.waitKey(10)
+# INICIO EN EL CENTRO
+x = 250
+y = 250
 
-cv.imshow('img', img)
-cv.waitKey(0)
+# POSICINES X Y Y
+dx = 4
+dy = 3
+
+radio = 20
+
+while True:
+
+    img = np.ones((height, width, 3), np.uint8) * 255
+
+    # DIBUJAR PELOTA
+    cv.circle(img, (x, y), radio, (0, 0, 255), -1)
+
+    # MOVER PELOTA
+    x = x + dx
+    y = y + dy
+
+    # PARA QUE REBOTE A LOS LADOS
+    if x + radio >= width or x - radio <= 0:
+        dx = -dx
+
+    # PARA QUE REBOTE ARRIBA Y ABAJO
+    if y + radio >= height or y - radio <= 0:
+        dy = -dy
+
+    cv.imshow("Ping Pong", img)
+
+    if cv.waitKey(10) == 27:  # ESC para salir
+        break
+
 cv.destroyAllWindows()
