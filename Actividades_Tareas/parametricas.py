@@ -8,8 +8,6 @@ img = np.ones((height, width, 3), dtype=np.uint8)*255
 # centro
 center_x, center_y = width // 2, height // 2
 
-# Parámetros 
-
 # rojo
 a1, b1 = 150, 100
 k1 = 4
@@ -68,7 +66,6 @@ while True:
   
     img = np.ones((height, width, 3), dtype=np.uint8) * 255
     
-    # Para salir con ESC ?????????
     if cv2.waitKey(5) & 0xFF == 27:
         break
 
