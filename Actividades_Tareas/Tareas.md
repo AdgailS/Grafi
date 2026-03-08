@@ -1,4 +1,5 @@
 # TAREAS GRAFICACIÓN
+---
 ## Tarea 1. Imagen con puntillismo 
 Mi idea principal fue hacer el dibujo de una flor de 5 petalos y para comenzar importé las librerías necesarias y cree la imagen de 500x500 pixeles
 
@@ -34,14 +35,15 @@ for fila in range(500):
 ```
 Al final, como en todos los ejercicios solo se muestra la imagen.
 
+---
 
 ## Tarea 2. Ejercicios de HSV con imagen de frutas 
 
 
-
+---
 ## Tarea 3. Escalación de imagenes 
 
-
+---
 ## Tarea 4. Animación con ecuaciones paramétricas 
 Para generar esta animación solo tomé como base el codigo que nos había proporcionado en los apuntes y busqué imagenes el google con los dibujos que se podrían realizar, donde encontré los datos para realizar el espirar y las flores, a las cuales solo les cambié los valores de a, b y k para realizar distintos tamaños y cambiar la cantidad de petalos. 
 
@@ -105,7 +107,10 @@ while True:
         y = int(center_y + r * np.sin(t))
         cv2.circle(img, (x, y), 2, (0, 255, 255), -1)
 ```
-### Tarea 5. Dibujo con ecuaciones paramétricas
+---
+
+
+## Tarea 5. Dibujo con ecuaciones paramétricas
 Como dibujo decidí hacer el contorno de un pollito (me arrepentí), para el cual usé solo lineas y un circulo para el ojo. Mi trabajo principan fue dividir la imagen como una cuadrilla para saber donde iniciaba y terminba cada punto e ir uniendolos.
 ```
 import numpy as np
@@ -154,8 +159,8 @@ cv.waitKey(0)
 cv.destroyAllWindows()
 ```
 
-
-### Tarea 6. Ping Pong 
+---
+## Tarea 6. Ping Pong 
 La idea del ejercicio era hacer que la pelota se mueva en (x,y) y que cuando se toque una pared se invierta la dirección para dar la ilusión de que rebota.
 Primero definí la posicion inicial para que sea el centro (x,y), la velocidad para cada uno (dx,dy) y el tamaño de la pelota
 ```
@@ -188,8 +193,8 @@ while True:
     cv.imshow("Ping Pong", img)
 ```
 
-
-### Tarea 7. Filtro con nariz, orejas, cejas y bigote 
+---
+## Tarea 7. Filtro con nariz, orejas, cejas y bigote 
 
 En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo distintos elemtos para cada parte de la cara que queriá representar, usando lineas para las cejas, una elipse completa (-1) para la nariz, dos rin relleno para el bigote y otras dos rellenas para las orejas.
 
@@ -206,4 +211,6 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
         # OREJA DERECHA
         cv.ellipse(img, (x + w + 15, y + int(h*0.5)), (25,40), 0, 0, 360, (150,180,255), -1)
 ```
+---
+ 
 
