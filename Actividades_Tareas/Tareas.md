@@ -105,8 +105,57 @@ while True:
         y = int(center_y + r * np.sin(t))
         cv2.circle(img, (x, y), 2, (0, 255, 255), -1)
 ```
+### Tarea 5. Dibujo con ecuaciones paramétricas
+Como dibujo decidí hacer el contorno de un pollito (me arrepentí), para el cual usé solo lineas y un circulo para el ojo. Mi trabajo principan fue dividir la imagen como una cuadrilla para saber donde iniciaba y terminba cada punto e ir uniendolos.
+```
+import numpy as np
+import cv2 as cv
 
-### Tarea 5. Ping Pong 
+img = np.ones((400,400,3), dtype=np.uint8)*255
+
+
+# CUERPO
+cv.line(img,(100,300),(300,300),(0,0,0),2) 
+cv.line(img,(300,300),(340,270),(0,0,0),2) 
+cv.line(img,(340,270),(340,180),(0,0,0),2) 
+cv.line(img,(340,180),(300,210),(0,0,0),2) 
+cv.line(img,(300,210),(260,180),(0,0,0),2)   
+cv.line(img,(260,180),(180,180),(0,0,0),2) 
+cv.line(img,(180,180),(220,150),(0,0,0),2) 
+cv.line(img,(220,150),(180,90),(0,0,0),2) #8
+cv.line(img,(180,90),(100,90),(0,0,0),2) 
+cv.line(img,(100,90),(60,120),(0,0,0),2) 
+cv.line(img,(60,120),(20,135),(0,0,0),2) 
+cv.line(img,(20,135),(60,150),(0,0,0),2) 
+cv.line(img,(60,150),(100,180),(0,0,0),2) #13
+cv.line(img,(100,180),(60,210),(0,0,0),2) 
+cv.line(img,(60,210),(60,270),(0,0,0),2) 
+cv.line(img,(60,270),(100,300),(0,0,0),2) 
+cv.line(img,(60,120),(60,150),(0,0,0),2) 
+
+cv.circle(img,(100,135),10,(0,0,0),-1) # OJO
+
+#PATAS
+cv.line(img,(140,300),(140,360),(0,0,0),2)
+cv.line(img,(140,360),(100,360),(0,0,0),2) 
+cv.line(img,(220,300),(220,360),(0,0,0),2) 
+cv.line(img,(220,360),(260,360),(0,0,0),2) 
+
+#ALA
+cv.line(img,(140,210),(140,240),(0,0,0),2) 
+cv.line(img,(140,240),(180,270),(0,0,0),2) 
+cv.line(img,(180,270),(260,270),(0,0,0),2) 
+cv.line(img,(260,270),(300,240),(0,0,0),2) 
+cv.line(img,(300,240),(260,210),(0,0,0),2) 
+cv.line(img,(260,210),(220,210),(0,0,0),2) 
+
+cv.imshow("Pollo",img)
+cv.waitKey(0)
+cv.destroyAllWindows()
+```
+
+
+### Tarea 6. Ping Pong 
 La idea del ejercicio era hacer que la pelota se mueva en (x,y) y que cuando se toque una pared se invierta la dirección para dar la ilusión de que rebota.
 Primero definí la posicion inicial para que sea el centro (x,y), la velocidad para cada uno (dx,dy) y el tamaño de la pelota
 ```
@@ -140,7 +189,7 @@ while True:
 ```
 
 
-### Tarea 5. Filtro con nariz, orejas, cejas y bigote 
+### Tarea 7. Filtro con nariz, orejas, cejas y bigote 
 
 En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo distintos elemtos para cada parte de la cara que queriá representar, usando lineas para las cejas, una elipse completa (-1) para la nariz, dos rin relleno para el bigote y otras dos rellenas para las orejas.
 
