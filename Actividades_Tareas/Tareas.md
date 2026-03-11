@@ -109,7 +109,6 @@ while True:
 ```
 ---
 
-
 ## Tarea 5. Dibujo con ecuaciones paramétricas
 Como dibujo decidí hacer el contorno de un pollito (me arrepentí), para el cual usé solo lineas y un circulo para el ojo. Mi trabajo principan fue dividir la imagen como una cuadrilla para saber donde iniciaba y terminba cada punto e ir uniendolos.
 ```
