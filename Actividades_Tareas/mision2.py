@@ -66,11 +66,8 @@ rotacion = cv.getRotationMatrix2D(center=centro, angle= -45, scale=1)
 # 2. Aplica cv2.warpAffine
 imagen_rotada = cv.warpAffine(img_qr, rotacion, (ancho, alto))
 
-# Display and save the rotated image
+
 cv.imshow("Imagen rotada Open CV", imagen_rotada)
-#cv.imwrite('rotated_image.jpg', imagen_rotada)
-
-
 
 cv.waitKey(0)
 cv.destroyAllWindows()
