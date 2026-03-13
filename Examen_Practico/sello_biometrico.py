@@ -1,12 +1,17 @@
-import numpy as np
 import cv2 as cv
+import numpy as np
 
-img = np.ones((500,500,3), dtype=np.uint8)*255
+lienzo = np.zeros((500,500,3), dtype=np.uint8)
+lienzo[:] = (50,20,20)   
 
+cv.circle(lienzo, (250,250), 100, (0,255,255), 3)
 
-# CUERPO
-cv.line(img,(100,300),(300,300),(0,0,0),2)
+cv.rectangle(lienzo, (200,200), (300,300), (0,0,255), -1)
 
-cv.rectangle(img, (10,10), (200,100), (34,56,100), -1)
-cv.circle(img, (250,250), 3, (23, 43, 144), -1 )
-cv.line(img, (255,255), (200,100), (23, 244, 144), 4)
+cv.line(lienzo, (0,0), (500,500), (255,255,255), 2)
+cv.line(lienzo, (0,500), (500,0), (255,255,255), 2)
+
+cv.imshow("Sello", lienzo)
+
+cv.waitKey(0)
+cv.destroyAllWindows()
