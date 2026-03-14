@@ -1,17 +1,20 @@
-import cv2 as cv
+import cv2
 import numpy as np
+import math
 
-img = cv.imread('Imagenes/m4_ruido.png')
+imagen = np.zeros((500,500,3), dtype=np.uint8)
 
-hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+t = 0
 
-bajo = np.array([80,100,100])
-alto = np.array([100,255,255])
+while t <= 2*math.pi:
 
-mascara = cv.inRange(hsv, bajo, alto)
+    x = int(250 + 150 * math.sin(3*t))
+    y = int(250 + 150 * math.sin(2*t))
 
-cv.imshow("Imagen original", img)
-cv.imshow("Mascara Cyan", mascara)
+    cv2.circle(imagen, (x,y), 1, (0,0,150), -1)
 
-cv.waitKey(0)
-cv.destroyAllWindows()
+    t += 0.01
+
+cv2.imshow("Recorrido", imagen)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

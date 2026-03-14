@@ -11,6 +11,7 @@ h1, w1 = img1.shape
 h2, w2 = img2.shape
 
 
+
 ## IMAGEN 1 ##
 M1 = np.float32([
     [1,0,0],
@@ -40,5 +41,3 @@ cv.imshow("QR reconstruido", lienzo)
 
 cv.waitKey(0)
 cv.destroyAllWindows()
-
-

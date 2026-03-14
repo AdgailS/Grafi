@@ -12,6 +12,5 @@ cv.line(lienzo, (0,0), (500,500), (255,255,255), 2)
 cv.line(lienzo, (0,500), (500,0), (255,255,255), 2)
 
 cv.imshow("Sello", lienzo)
-
 cv.waitKey(0)
 cv.destroyAllWindows()

@@ -8,7 +8,6 @@ h, w = img.shape
 img_final = np.zeros((h, w), dtype=np.uint8)
 
 # --- MODO RAW ---
-# Recorre con un for y multiplica por 50
        
 for y in range(h):
     for x in range(w):  
@@ -22,8 +21,6 @@ cv2.imshow('Revelada', img_final)
 
 
 # --- MODO OPENCV ---
-# Usa la magia de la vectorización
-
 img_final_CV = img * 50
 img_final_CV = np.clip(img_final_CV, 0, 255).astype(np.uint8)
 
