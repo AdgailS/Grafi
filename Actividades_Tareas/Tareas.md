@@ -37,11 +37,91 @@ Al final, como en todos los ejercicios solo se muestra la imagen.
 
 ---
 
-## Tarea 2. Ejercicios de HSV con imagen de frutas 
+## Tarea 2. Segmentación de Frutas usando Máscara HSV
 
+### Actividad 1: Exploración del Espacio HSV
+1. Seleccionar un color (rojo, verde o amarillo).
+2. Ajustar el rango HSV hasta que la máscara detecte únicamente las frutas de ese color.
+
+#### Reflexión:
+
+1. ¿Qué ocurre cuando el rango es muy estrecho?
+ No se alcanzan a detectar todos los rangos del color, lo que hace que queden frutas sin detectar o con huecos en las mismas.
+
+2. ¿Qué ocurre cuando el rango es muy amplio? Se detectan otros tonos de color cercanos, por ejemplo si dejamos un rango muy amplio en el amarillo puede comenzar a detectar verde y rojo, lo que entorpece el conteo por color.
+
+![Selecciòn de color amarillo ](Imagenes/hsv1.png)
+ç
+### Actividad 2: Limpieza de Ruido
+1. Analizar la máscara sin aplicar operaciones morfológicas.
+2. Aplicar un método de limpieza (apertura o cierre).
+3. Comparar ambas máscaras.
+
+#### Responder:
+1. ¿Qué tipo de ruido aparece? Hay pixeles blancos regados en sonas que deben ser negras o zonas negras en medio de las figuras de las frutas. 
+
+2. ¿Por qué es necesario eliminarlo antes del conteo? Porque se pueden detectar como zonas con color tambien e incluirlas en el conteo, lo que nos causa resultados erroneos.
+
+![Limpieza de ruido ](Imagenes/hsv2.png)
+
+```
+RESULTADOS DEL CONTEO 
+
+Número total de frutas detectadas: 9
+Fruta 1: Área aproximada = 1360 píxeles
+Fruta 2: Área aproximada = 5810 píxeles
+Fruta 3: Área aproximada = 4227 píxeles
+Fruta 4: Área aproximada = 3259 píxeles
+Fruta 5: Área aproximada = 5968 píxeles
+Fruta 6: Área aproximada = 3978 píxeles
+Fruta 7: Área aproximada = 4911 píxeles
+Fruta 8: Área aproximada = 5960 píxeles
+Fruta 9: Área aproximada = 5034 píxeles
+```
+
+### Actividad 3: Conteo de Regiones
+1. Identificar cuántas regiones conectadas existen en la máscara.
+2. Filtrar regiones pequeñas (ruido).
+
+
+#### Reportar:
+1. Número total de frutas detectadas.
+2. Área aproximada de cada región válida.
+
+```
+TABLA DE RESULTADOS
+==================================================
+Color        Regiones     Observación
+==================================================
+Rojo         8            8 regiones detectadas
+Verde        23           23 regiones detectadas
+Amarillo     9            9 regiones detectadas
+==================================================
+```
+
+### Actividad 4: Comparación entre Colores
+#### Preguntas:
+
+1. ¿Qué color fue más fácil segmentar? El verde, porque nuestro rango es muy amplio y continuo.
+
+2. ¿Cuál presentó más ruido? ¿Por qué?
+El rojo, porque se necesitan dos rangos de color para avarcar todas las tonalidades y en esto se pueden crear mas sombras.
+
+### Actividad 5: Análisis Crítico
+Responder de manera argumentada:
+
+1. ¿Por qué HSV es más adecuado que RGB para esta tarea? Porque en HSV separamos toda la informaciòn del color, lo que mantiene el tono del color. 
+
+2. ¿Cómo afecta la iluminación al canal V? Si la iluminación es muy baja, el canal V disminuye y las frutas pueden confundirse con el fondo oscuro.
+
+3. ¿Qué sucede si dos frutas tienen tonos similares? No se pueden separar usando solo HSV, necesitarìa clasificsrlas tambièn por forma o tamaño, etc. 
+
+4. ¿Qué limitaciones tiene la segmentación por color? Que tonos o colores similares se pueden confundir y contar como el mismo o por el contrario, una fruta con varias tonalidades la marcaba con espacios o huecos.
 
 ---
 ## Tarea 3. Escalación de imagenes 
+
+** ESTÀ EL CODIGO, FALTA MD
 
 ---
 ## Tarea 4. Animación con ecuaciones paramétricas 
@@ -211,5 +291,8 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
         cv.ellipse(img, (x + w + 15, y + int(h*0.5)), (25,40), 0, 0, 360, (150,180,255), -1)
 ```
 ---
+
+## TAREA 8. Dibujo con perspectiva isometrica 
+*** ESTÀ EL CODIGO, FALTA MD
  
 
