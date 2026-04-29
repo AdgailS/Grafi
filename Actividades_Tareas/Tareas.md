@@ -296,3 +296,26 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
 *** ESTÀ EL CODIGO, FALTA MD
  
 
+
+ ## TAREA 9. Dibujo de una flor que se escala 
+
+Con el codigo de detceccion de manos visto en clase la intención es dibujar en el centro de la pantalla una flor que cambie de tamaño en relación a las distancias entre los dedos pulgar e indice detectados en la pantalla, por lo que hice que la funcion que dibuja la flor recibiera esta distancia y la multiplicara para que fuera mas nitido el dibujo: 
+
+```
+# CLACULAR DISTANCIA ENTRE PULGAR E INDICE
+x1, y1 = keypoints[4]  # Punta del pulgar
+x2, y2 = keypoints[8]  # Punta del índice
+distancia = math.hypot(x2 - x1, y2 - y1)
+
+def dibujar_flor(frame, cx, cy, distancia):
+    tamano = max(30, min(int(distancia * 1.5), 300))  # Tamaño entre 30 y 300
+```
+
+Después usando esa misma medida de tamaño dibujé toda la flor y la mostré en el centro de la imagen
+
+```
+centro_x = int(w / 2)  # Mitad del ancho
+centro_y = int(h / 2)  # Mitad del alto
+dibujar_flor(frame, centro_x, centro_y, distancia)
+```
+
