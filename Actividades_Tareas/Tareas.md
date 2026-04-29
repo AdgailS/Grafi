@@ -299,7 +299,7 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
 
  ## TAREA 9. Dibujo de una flor que se escala 
 
-Con el codigo de detceccion de manos visto en clase la intención es dibujar en el centro de la pantalla una flor que cambie de tamaño en relación a las distancias entre los dedos pulgar e indice detectados en la pantalla, por lo que hice que la funcion que dibuja la flor recibiera esta distancia y la multiplicara para que fuera mas nitido el dibujo: 
+Con el codigo de deteccion de manos visto en clase la intención es dibujar en el centro de la pantalla una flor que cambie de tamaño en relación a las distancias entre los dedos pulgar e indice detectados en la pantalla, por lo que hice que la funcion que dibuja la flor recibiera esta distancia y la multiplicara para que fuera mas nitido el dibujo: 
 
 ```
 # CLACULAR DISTANCIA ENTRE PULGAR E INDICE
@@ -319,3 +319,36 @@ centro_y = int(h / 2)  # Mitad del alto
 dibujar_flor(frame, centro_x, centro_y, distancia)
 ```
 
+## TAREA 10. Vecindad usando GLUT
+
+Usando los codigos vistos en clase de como dibujar una casa y un arbol con formas GLUT solo tome el codigo de la vecindad y agregué ahí los bloques de codigo para dibujar arboles entre ellos, quedando algo así para el tronco:
+
+```
+def draw_trunk():
+    """Dibujar el tronco del árbol """
+    glPushMatrix()
+    glColor3f(0.6, 0.3, 0.1)  # Marrón para el tronco
+    glRotatef(-90, 1, 0, 0)  # Rotar para orientar el cilindro verticalmente
+    quadric = gluNewQuadric()
+    gluCylinder(quadric, 0.3, 0.3, 1.5, 16, 16)
+    glPopMatrix()
+```
+Y así para las hojas:
+```
+    def draw_foliage():
+    """Dibujar las hojas del árbol"""
+    # Primera capa
+    glPushMatrix()
+    glColor3f(0.1, 0.7, 0.1) 
+    glTranslatef(0.0, 1.5, 0.0)  # va arriba del tronco
+    quadric = gluNewQuadric()
+    gluSphere(quadric, 0.8, 16, 16)
+    glPopMatrix()
+    
+
+    glPushMatrix()
+    glColor3f(0.2, 0.8, 0.2)  # Verde más claro
+    glTranslatef(0.0, 2.2, 0.0)
+    gluSphere(quadric, 0.6, 16, 16)
+    glPopMatrix()
+    ```
