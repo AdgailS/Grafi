@@ -54,7 +54,7 @@ def init():
     # Cargar texturas
     tex_pasto = load_texture("Imagenes/pasto.jpg")
     tex_pared = load_texture("Imagenes/piso.jpg")
-    tex_techo = load_texture("Imagenes/techo.jpg")
+    tex_techo = load_texture("Imagenes/techogit .jpg")
 
 
 def draw_ground():
