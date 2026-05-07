@@ -2,14 +2,20 @@ import glfw
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+
+light_position = [2.0, 3.0, 4.0, 1.0]
+    
 rotation = 0.0
 
 def set_material(ambient, diffuse, specular, shininess, face=GL_FRONT):
-    """Configura las propiedades del material para una superficie"""
+    """Propiedades del material """
     glMaterialfv(face, GL_AMBIENT, ambient)
     glMaterialfv(face, GL_DIFFUSE, diffuse)
     glMaterialfv(face, GL_SPECULAR, specular)
     glMaterialf(face, GL_SHININESS, shininess)
+    
+   # glEnable(GL_COLOR_MATERIAL)          ////// PASO 4. ELIMINAN LOS COLORES (BLANCO)
+   # glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE) //// SE MANTIENE LA LUZ
 
 def draw_sphere(radius, slices=30, stacks=30):
     """Función auxiliar para dibujar esferas usando GLU"""
@@ -81,8 +87,8 @@ def setup_lighting():
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light)
     
     # Luz principal
-    light_position = [2.0, 3.0, 4.0, 1.0]
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position)
+   # light_position = [2.0, 3.0, 4.0, 1.0]
+   # glLightfv(GL_LIGHT0, GL_POSITION, light_position)
     
     # Componentes de la luz
     light_ambient = [0.3, 0.3, 0.3, 1.0]
@@ -110,7 +116,7 @@ def main():
     glClearColor(0.54, 0.72, 0.84, 1.0)
     setup_lighting()
     
-    # Habilitar smooth shading
+
     glShadeModel(GL_SMOOTH)
 
     while not glfw.window_should_close(window):
@@ -126,7 +132,7 @@ def main():
 
         rotation += 0.1
         glRotatef(rotation, 0, 1, 0)
-
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position) ### LUZ PEGADA PASO 5
         draw_eye()
 
         glfw.swap_buffers(window)
