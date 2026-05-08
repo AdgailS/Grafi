@@ -102,6 +102,60 @@ def draw_circle_eyes():
         glScalef(0.4, 0.4, 0.4)
         draw_eye()
         glPopMatrix()
+        
+        
+def draw_flor_eyes(num_eyes, radius):
+
+    for i in range(num_eyes):
+
+        angle = i * (360.0 / num_eyes)
+        rad = math.radians(angle)
+
+        x = radius * math.cos(rad)
+        y = radius * math.sin(rad)
+
+        glPushMatrix()
+
+        glTranslatef(x, y, 0)
+        glRotatef(angle + 90, 0, 0, 1)
+
+        glScalef(0.4, 0.4, 0.4)
+
+        draw_eye()
+
+        glPopMatrix()
+
+    
+def draw_flor_eyes():
+               
+    """Flor de ojos """
+    
+    # PRIMER círculo
+    draw_flor_eyes(8, 2.5)
+
+    # SEGUNDO círculo
+    draw_flor_eyes(12, 4.5)
+
+    # TERCER círculo
+    draw_flor_eyes(16, 6.5)
+    
+    num_eyes = 5
+    radius = 0.5
+    
+    for i in range(num_eyes):
+        angle = i * (360.0 / num_eyes)
+        rad = math.radians(angle)
+        
+        x = radius * math.cos(rad)
+        y = radius * math.sin(rad)
+        
+        glPushMatrix()
+        glTranslatef(x, y, 0)
+        glRotatef(angle + 90, 0, 0, 1)
+        glScalef(0.4, 0.4, 0.4)
+        draw_eye()
+        glPopMatrix()
+
 
 def draw_eyes():
     """Dibuja según el modo actual"""
@@ -113,6 +167,8 @@ def draw_eyes():
         draw_grid_eyes()
     elif eye_mode == 3:
         draw_circle_eyes()
+    elif eye_mode == 5:
+        draw_flor_eyes() #/////////////////////////////
 
 def setup_lighting():
     """Configura iluminación básica"""
@@ -143,6 +199,10 @@ def key_callback(window, key, scancode, action, mods):
         elif key == glfw.KEY_4:
             eye_mode = 3
             print("Modo: CÍRCULO (araña)")
+            
+        elif key == glfw.KEY_5: #//////////////////////////////////////////////////////////////////////////
+            print("Modo: FLOR")
+            eye_mode = 5
 
 def main():
     global rotation
@@ -193,3 +253,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    ### ACTIVIDAD PROBAR LUZ Y OJOS PARA WINDOWS // HACER OTRA FIGURA DE OJOS ¿Y OTRO MODO DE ILUMINACIÓN?
