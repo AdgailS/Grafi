@@ -18,7 +18,7 @@ def poly_param(fx, fy, t0, t1, n, cx, cy, sx, sy):
     return np.round(np.stack([xs, ys], 1)).astype(np.int32).reshape((-1, 1, 2))
 
 def hsv_to_bgr(h, s, v):
-    # OpenCV: H en [0,179], S,V en [0,255]
+    # OpenCV: H en [0,179], S,V en [0,255] 
     hsv = np.uint8([[[h % 180, np.clip(s, 0, 255), np.clip(v, 0, 255)]]])
     return tuple(int(x) for x in cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)[0, 0])
 

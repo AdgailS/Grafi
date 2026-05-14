@@ -1,3 +1,4 @@
 .entornos/
+.venv/
 __pycache__/
 *.pyc
