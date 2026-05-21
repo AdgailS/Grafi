@@ -2,9 +2,19 @@ import time, math
 import numpy as np
 import cv2
 
+########### MI TRABAJO ################################
+## //// LO QUE FALTA
+# //// CAMBIAR FONDOS 
+# /// AJUSTAR CIRCULO EXTERIOR FLOWER OF LIFE
+# /// SRI YANTRA NO QUEDO
+# ///  ROSA POLAR CHIQUITA/ CIRCULO EXTERIOR
+# /// FRUIT OF LIFE NI SE MUESTRA
 W, H = 800, 600
 FPS = 30
-DURATION = 60.0
+DURATION = 70.0
+
+angulos_up = [0.24, 0.21, 0.18, 0.15]
+angulos_down = [0.22, 0.19, 0.16, 0.13, 0.10]
 
 def clamp01(x): return 0.0 if x < 0.0 else (1.0 if x > 1.0 else x)
 def smoothstep(a, b, x):
@@ -62,113 +72,154 @@ def background_hsv_gradient(img, t, hue0=10, hue1=140): #///////////////////////
 
 
 
-def scene_credits(img, t): #///////////////// CREDITOS ///////////////////////////////
+def scene_credits(img, t):
     background_hsv_gradient(img, t, hue0=165, hue1=105)
-    rng = np.random.default_rng(1)    # “estrellas” deterministas
+    rng = np.random.default_rng(1)
     xs = rng.integers(0, W, 380)
     ys = rng.integers(0, int(H*0.65), 380)
     img[ys, xs] = (255, 255, 255)
     img[:] = cv2.GaussianBlur(img, (0,0), 0.6)
-    cv2.putText(img, "DEMO FIGURAS GEOMETRICAS (GRAFICACION)", (100, 260), cv2.FONT_HERSHEY_SIMPLEX, 0.95, (245,245,245), 2, cv2.LINE_AA)
-    cv2.putText(img, "OpenCV + Matematicas", (250, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (220,220,220), 2, cv2.LINE_AA)
-    cv2.putText(img, "Estrella Abigail",(270,340), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.85, (220,220,220), 2, cv2.LINE_AA)
+
+    titulo = "DEMO FIGURAS GEOMETRICAS"
+    subtitulo = "OpenCV + Matematicas"
+    nombre = "Estrella Abigail"
+
+    size1 = cv2.getTextSize(titulo, cv2.FONT_HERSHEY_SIMPLEX, 0.95, 2)[0]
+    size2 = cv2.getTextSize(subtitulo, cv2.FONT_HERSHEY_SIMPLEX, 0.85, 2)[0]
+    size3 = cv2.getTextSize(nombre, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.85, 2)[0]
+
+    cv2.putText(img, titulo, ((W-size1[0])//2, 250), cv2.FONT_HERSHEY_SIMPLEX, 0.95, (245,245,245), 2, cv2.LINE_AA)
+    cv2.putText(img, subtitulo, ((W-size2[0])//2, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (220,220,220), 2, cv2.LINE_AA)
+    cv2.putText(img, nombre, ((W-size3[0])//2, 360), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.85, (220,220,220), 2, cv2.LINE_AA)
 
 #///////////////// FRAME 1 /////////////////////////////
 # ============================================================
 # TORUS / LOTUS
 # ============================================================
 
-def scene_lotus(img, t): #/////////////// TERMINADA LOTUS OF LIFE /// CHECAR FONDO
+def scene_lotus(img, t, scale = 1.7): #/////////////// TERMINADA LOTUS OF LIFE /// CHECAR FONDO
     background_hsv_gradient(img, t, 160, 30)
     color = hsv_to_bgr(30, 240, 255)
     center = (400,300)
     petals = 24
-
+    radio = int(90 * scale)
+    
     for i in range(petals):
         ang = 2*np.pi*i/petals + t*0.2
-        x = int(center[0] + 90*np.cos(ang))
-        y = int(center[1] + 90*np.sin(ang))
-        cv2.circle(img, (x,y), 90, color, 1, cv2.LINE_AA)
+        x = int(center[0] + radio * np.cos(ang))
+        y = int(center[1] + radio * np.sin(ang))
+        cv2.circle(img, (x,y), radio, color, 1, cv2.LINE_AA)
         
 #///////////////// FRAME 2 /////////////////////////////
-def scene_rose_polar(img, t):
-    background_hsv_gradient(img, t, hue0=120, hue1=165)
-    # Rosa polar: r = cos(k*theta)
-    k = 5
-    theta0 = t * 0.6
-    fx = lambda th: np.cos(k*th) * np.cos(th + theta0)
-    fy = lambda th: np.cos(k*th) * np.sin(th + theta0)
-    pts = poly_param(fx, fy, 0, 2*math.pi, 1200, W*0.5, H*0.45, 240, 240)
-    col = hsv_to_bgr(int(145 + 25*np.sin(t*0.5)), 220, 245)
-    cv2.polylines(img, [pts], False, col, 2, cv2.LINE_AA)
-    # Círculos “beats”
+def scene_rose_polar(img, t, scale = 0.9): ##///////////////// SEED OF LIFE //// 2/3 BIEN
+    background_hsv_gradient(img, t, hue0=100, hue1=60)
+
+    cx, cy = W//2, H//2
+    R = int(min(W, H) * 0.10 * scale)
+    pulsacion = 1.0 + 0.05 * math.sin(t*2.0)
+    col = hsv_to_bgr(int(45 + 30*math.sin(t*0.6)), 230, 245)
+    cv2.circle(img, (cx, cy), int(R*pulsacion), col, 3, cv2.LINE_AA)
+
     for i in range(6):
-        r = int(18 + 10*np.sin(t*2.0 + i))
-        cv2.circle(img, (int(W*0.18 + i*110), int(H*0.78)), max(1, r), (230,230,230), 1, cv2.LINE_AA)
+        angle = i * math.pi * 2 / 6 + t*0.25
+        x = int(cx + R * math.cos(angle))
+        y = int(cy + R * math.sin(angle))
+        cv2.circle(img, (x, y), int(R*pulsacion), col, 2, cv2.LINE_AA)
 
-
+        
 #///////////////// FRAME 3 /////////////////////////////
-def scene_spirograph(img, t):
-    background_hsv_gradient(img, t, hue0=80, hue1=20)
-    # Hipotrocoide (spirograph): (R-r)cos(t) + d cos((R-r)/r * t)
-    R, r, d = 8.0, 3.0, 5.0
-    w = (R - r) / r
-    fx = lambda x: (R-r)*np.cos(x) + d*np.cos(w*x + 0.4*np.sin(t*0.7))
-    fy = lambda x: (R-r)*np.sin(x) - d*np.sin(w*x + 0.4*np.cos(t*0.6))
-    pts = poly_param(fx, fy, 0, 14*math.pi, 1600, W*0.5, H*0.46, 26, 26)
-    col = hsv_to_bgr(int(10 + 140*(0.5+0.5*np.sin(t*0.4))), 240, 240)
-    cv2.polylines(img, [pts], False, col, 2, cv2.LINE_AA)
-    img[:] = post_scanlines(img, 0.18)
+def scene_spirograph(img, t, scale = 0.9):
+    background_hsv_gradient(img, t, hue0=50, hue1=10)
+
+    cx, cy = W//2, H//2
+    R = int(min(W, H) * 0.07 * scale)
+    R2 = int(R * 1.732)
+    rotacion_total = t * 0.2
+    col = hsv_to_bgr(int(30 + 40*math.sin(t*0.5)), 210, 235)
+    cv2.circle(img, (cx, cy), R, col, 2, cv2.LINE_AA)
+
+    for i in range(6):
+        angle = i * math.pi * 2 / 6 + rotacion_total
+        x = int(cx + R * math.cos(angle))
+        y = int(cy + R * math.sin(angle))
+        cv2.circle(img, (x, y), R, col, 2, cv2.LINE_AA)
+
+    for i in range(12):
+        angle = i * math.pi * 2 / 12 + rotacion_total
+        x = int(cx + R2 * math.cos(angle))
+        y = int(cy + R2 * math.sin(angle))
+        cv2.circle(img, (x, y), R, col, 1, cv2.LINE_AA)
+
+    cv2.circle(img, (cx, cy), int(R2+R), col, 2, cv2.LINE_AA)
     
 
 #///////////////// FRAME 4 /////////////////////////////
-def scene_particles(img, t, rng):
-    background_hsv_gradient(img, t, hue0=150, hue1=100)
-    n = 1200
-    xs = rng.random(n) * W
-    ys = rng.random(n) * H
-    xs = (xs + 110*np.sin(ys/55.0 + t*1.7) + 40*np.cos(t*0.7)) % W
-    ys = (ys + 85*np.cos(xs/75.0 + t*1.2) + 30*np.sin(t*0.9)) % H
-    # “brillo” por velocidad (fake)
-    v = (0.5 + 0.5*np.sin(t*1.9)).astype(float) if hasattr(t, "astype") else (0.5 + 0.5*math.sin(t*1.9))
-    col = hsv_to_bgr(int(95 + 40*math.sin(t*0.8)), 210, int(210 + 40*v))
-    img[ys.astype(np.int32), xs.astype(np.int32)] = col
-    img[:] = cv2.GaussianBlur(img, (0,0), 1.1)
+def scene_particles(img, t, rng, scale = 0.9): #/////////// SRI YANTRA // INTENTO DE :(/// CHECAR SI SE ARREGLA
+    background_hsv_gradient(img, t, hue0=140, hue1=180)
 
+    cx, cy = W//2, H//2
+    radios_up = [0.24, 0.21, 0.18, 0.15]
+    radios_down = [0.22, 0.19, 0.16, 0.13, 0.10]
+    zoom = 1.0 + 0.04 * math.sin(t*1.5)
 
-#///////////////// FRAME 5 /////////////////////////////
-def scene_fire(img, t, state):
-    # “Fuego” procedural: partículas + heatmap + paleta HSV
-    heat = state["heat"]
-    rng = state["rng"]
-    heat[:] = (heat * 0.93).astype(np.float32)
+    def triangulo(rotation, pointing_up, radio_val):
+        R = int(min(W, H) * radio_val * scale * zoom)
+        pts = []
 
-    # Inyección en la base (más calor = más fuego)
-    base_n = 1400
-    xs = rng.integers(0, W, base_n)
-    ys = rng.integers(int(H*0.82), H, base_n)
-    heat[ys, xs] += rng.random(base_n) * (0.8 + 0.6*(0.5+0.5*math.sin(t*2.0)))
+        for i in range(3):
+            angle = rotation + i * 2 * math.pi / 3
 
-    # “subida” del calor: blur anisotrópico + desplazamiento hacia arriba
-    heat[:] = cv2.GaussianBlur(heat, (0, 0), 2.2)
-    heat[:-2, :] = heat[2:, :]  # desplaza hacia arriba (convección barata)
-    heat[-2:, :] *= 0.0
+            if not pointing_up:
+                angle += math.pi
+                
+            x = int(cx + R * math.cos(angle))
+            y = int(cy + R * math.sin(angle))
 
-    # Mapeo a color con HSV (rojo->amarillo->blanco)
-    h = (20 - 20*np.clip(heat, 0, 1)).astype(np.uint8)      # 20..0
-    s = (220 - 80*np.clip(heat, 0, 1)).astype(np.uint8)     # 220..140
-    v = (60 + 195*np.clip(heat, 0, 1)).astype(np.uint8)     # 60..255
-    hsv = np.dstack([h, s, v]).astype(np.uint8)
-    img[:] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+            pts.append([x, y])
+        return np.array([pts], np.int32)
 
-    # Silueta y chispas
-    cv2.rectangle(img, (0, int(H*0.83)), (W, H), (10, 10, 10), -1)
-    sparks = 160
-    sx = rng.integers(0, W, sparks)
-    sy = rng.integers(int(H*0.55), int(H*0.9), sparks)
-    img[sy, sx] = (255, 255, 255)
-    img[:] = cv2.GaussianBlur(img, (0,0), 0.6)
+    for i in range(4):
+        rot = math.radians(angulos_up[i] * 100) + t*0.03
+        pts = triangulo(rot, True, radios_up[i])
+        col = hsv_to_bgr(300 + 20*i, 220, 240)
+        cv2.polylines(img, pts, True, col, 2, cv2.LINE_AA)
 
+    for i in range(5):
+        rot = math.radians(angulos_down[i] * 100) - t*0.03
+        pts = triangulo(rot, False, radios_down[i])
+        col = hsv_to_bgr(60 + 15*i, 220, 240)
+        cv2.polylines(img, pts, True, col, 2, cv2.LINE_AA)
+        
+        
+#///////////////////// FRAME 5 /////////////////////////// ROSA POLAR
+def scene_final(img, t, scale = 0.9):
+    background_hsv_gradient(img, t, hue0=120, hue1=165)
+
+    cx, cy = W//2, H//2
+
+    R = int(120 * scale)
+
+    col = hsv_to_bgr(int(145 + 25*np.sin(t*0.5)), 220, 245)
+
+    deform = 1.0 + 0.08 * math.sin(t*1.2)
+
+    for i in range(6):
+        angle = i * math.pi * 2 / 6 + t * 0.35
+
+        x = int(cx + R/1.8 * math.cos(angle))
+        y = int(cy + R/1.8 * math.sin(angle))
+
+        axes = (int((R/1.3)*deform), int(R/4))
+
+        cv2.ellipse(img, (x, y), axes, math.degrees(angle), 0, 360, col, 2, cv2.LINE_AA)
+
+    cv2.circle(img, (cx, cy), int(R/3), col, 2, cv2.LINE_AA)
+    cv2.circle(img, (cx, cy), int(R * 1.15), col, 2, cv2.LINE_AA)
+    
+#///////////////// FRAME 6 /////////////////////////////
+def scene_fire(img, t, state, scale = 0.9): #////FRUIT OF LIFE //// esta mal
+    background_hsv_gradient(img, t, hue0=40, hue1=80)
+ 
 
 
 # ------------------------------------------------------------
@@ -178,15 +229,17 @@ def render_scene(buf, scene_id, t, rng, fire_state):
     if scene_id == 0:
         scene_credits(buf, t)
     elif scene_id == 1:
-        scene_lotus(buf, t) #/////////////////// 1 FLOR DE LOTO
+        scene_lotus(buf, t, scale = 1.4)     
     elif scene_id == 2:
-        scene_rose_polar(buf, t)
+        scene_rose_polar(buf, t, scale = 1.4) 
     elif scene_id == 3:
-        scene_spirograph(buf, t)
+        scene_spirograph(buf, t, scale = 1.7) ##/// TAMAÑO
     elif scene_id == 4:
-        scene_particles(buf, t, rng)
+        scene_particles(buf, t, rng, scale = 1.5 )
+    elif scene_id == 5:
+        scene_final(buf, t, scale= 1.9)
     else:
-        scene_fire(buf, t, fire_state)
+        scene_fire(buf, t, fire_state, scale= 1.5)
         
         
 # ------------------------------------------------------------
@@ -195,7 +248,7 @@ def render_scene(buf, scene_id, t, rng, fire_state):
 def timeline(t, rng, bufA, bufB, fire_state):
     # 6 escenas (0..5) con 5 transiciones entre ellas
     # Duración 60s -> 6 bloques de 10s
-    block = int(min(5, max(0, t // 10)))
+    block = int(min(6, max(0, t // 10)))
     t_in = t - block*10
 
     # Render escena base
@@ -203,7 +256,7 @@ def timeline(t, rng, bufA, bufB, fire_state):
     frame = bufA
 
     # 5 transiciones: de s a s+1 en los últimos 1.2s de cada bloque
-    if block < 5 and t_in >= 8.8:
+    if block < 6 and t_in >= 8.8: #/////////// 6 ESCENAS
         render_scene(bufA, block, t, rng, fire_state)
         render_scene(bufB, block+1, t, rng, fire_state)
         a = smoothstep(8.8, 10.0, t_in)

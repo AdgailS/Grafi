@@ -12,6 +12,7 @@ import numpy as np
 # cv2 -> OpenCV para dibujar imágenes, texto, filtros y mostrar ventana
 import cv2
 
+########################33 DEMO BASE EXPLICADO #########################
 
 # ------------------------------------------------------------
 # CONFIGURACIÓN GENERAL DEL VIDEO / DEMO
@@ -451,9 +452,21 @@ def scene_particles(img, t, rng):
     # Blur para glow
     img[:] = cv2.GaussianBlur(img, (0,0), 1.1)
 
-
 # ------------------------------------------------------------
-# ESCENA 5 - FUEGO PROCEDURAL
+# ESCENA 5 - añadida
+# ------------------------------------------------------------
+
+def scene_final(img, t): ### escena extra
+    background_hsv_gradient(img, t, hue0=X, hue1=Y)
+    # Ecuaciones paramétricas
+    fx = lambda th: ...  # fórmula X
+    fy = lambda th: ...  # fórmula Y
+    pts = poly_param(fx, fy, 0, 2*math.pi, 1200, W*0.5, H*0.45, 240, 240)
+    col = hsv_to_bgr(int(...), 220, 245)
+    cv2.polylines(img, [pts], False, col, 2, cv2.LINE_AA)
+    
+# ------------------------------------------------------------
+# ESCENA 6 - FUEGO PROCEDURAL
 # ------------------------------------------------------------
 
 def scene_fire(img, t, state):
@@ -531,6 +544,9 @@ def render_scene(buf, scene_id, t, rng, fire_state):
 
     elif scene_id == 4:
         scene_particles(buf, t, rng)
+        
+    elif scene_id == 5: ## agregar escena extra
+        scene_final(buf, t, rng)
 
     else:
         scene_fire(buf, t, fire_state)
@@ -554,7 +570,7 @@ def timeline(t, rng, bufA, bufB, fire_state):
     frame = bufA
 
     # TRANSICIONES
-    if block < 5 and t_in >= 8.8:
+    if block < 6 and t_in >= 8.8: ##### añadir escena extra
 
         render_scene(bufA, block, t, rng, fire_state)
         render_scene(bufB, block+1, t, rng, fire_state)

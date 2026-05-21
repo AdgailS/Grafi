@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-
+#### LO QUE VIMOS EN CLASE #################
 # Definir los parámetros iniciales
 width, height = 1000, 1000  # Ampliar la ventana para ver toda la figura
 img = np.ones((height, width, 3), dtype=np.uint8)*255
