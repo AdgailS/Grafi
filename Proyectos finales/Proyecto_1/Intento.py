@@ -8,7 +8,7 @@ img = np.ones((height, width, 3), dtype=np.uint8)*255
 
 # Parámetros de la curva de Limacon
 a, b = 150, 100  # Reducir los valores de a y b para que la curva se ajuste mejor
-k = 1.9# Constante de multiplicación del ángulo
+k = 1.9 # Constante de multiplicación del ángulo
 theta_increment = 0.05  # Incremento del ángulo
 max_theta = 2 * np.pi  # Un ciclo completo
 

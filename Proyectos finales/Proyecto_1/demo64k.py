@@ -4,14 +4,11 @@ import cv2
 
 ########### MI TRABAJO ################################
 ## //// LO QUE FALTA
-# //// CAMBIAR FONDOS 
-# /// AJUSTAR CIRCULO EXTERIOR FLOWER OF LIFE
-# /// SRI YANTRA NO QUEDO
-# ///  ROSA POLAR CHIQUITA/ CIRCULO EXTERIOR
-# /// FRUIT OF LIFE NI SE MUESTRA
+# /// FRUIT OF LIFE - COMPLETADO
+
 W, H = 800, 600
 FPS = 30
-DURATION = 70.0
+DURATION = 70.0  # 1:10 minutos = 70 segundos
 
 angulos_up = [0.24, 0.21, 0.18, 0.15]
 angulos_down = [0.22, 0.19, 0.16, 0.13, 0.10]
@@ -21,14 +18,7 @@ def smoothstep(a, b, x):
     x = clamp01((x - a) / (b - a))
     return x * x * (3 - 2 * x)
 
-def poly_param(fx, fy, t0, t1, n, cx, cy, sx, sy): #//////////777 CURVA PARAMÉTRICA
-    ts = np.linspace(t0, t1, n, dtype=np.float32)
-    xs = fx(ts) * sx + cx
-    ys = fy(ts) * sy + cy
-    return np.round(np.stack([xs, ys], 1)).astype(np.int32).reshape((-1, 1, 2))
-
-def hsv_to_bgr(h, s, v):  #///////////7 CAMBIA HSV A BGR
-    # OpenCV: H en [0,179], S,V en [0,255] 
+def hsv_to_bgr(h, s, v):
     hsv = np.uint8([[[h % 180, np.clip(s, 0, 255), np.clip(v, 0, 255)]]])
     return tuple(int(x) for x in cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)[0, 0])
 
@@ -36,7 +26,7 @@ def hsv_to_bgr(h, s, v):  #///////////7 CAMBIA HSV A BGR
 # ------------------------------------------------------------
 # EFECTOS POST-PROCESADO
 # ------------------------------------------------------------
-def post_vignette(img, strength=0.7):
+def post_vignette(img, strength=0.5):
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
     nx = (xx - W*0.5) / (W*0.5)
     ny = (yy - H*0.5) / (H*0.5)
@@ -45,41 +35,75 @@ def post_vignette(img, strength=0.7):
     out = (img.astype(np.float32) * mask[..., None]).astype(np.uint8)
     return out
 
-def post_scanlines(img, strength=0.22): #/////////////// LINEAS DE MONITOR
+def post_scanlines(img, strength=0.12):
     out = img.astype(np.float32)
     y = np.arange(H, dtype=np.float32)
     m = 1.0 - strength * (0.5 + 0.5*np.sin(2*np.pi*y/3.0))
     out *= m[:, None, None]
     return np.clip(out, 0, 255).astype(np.uint8)
 
-def post_posterize(img, q=32): #///////////////////////// estilo artístico/cartoon.
+def post_posterize(img, q=32):
     q = max(1, int(q))
     return ((img // q) * q).astype(np.uint8)
 
 
 # ------------------------------------------------------------
-# FONDO GRADIENTE HSV
+# FONDO SÓLIDO CON COLOR CAMBIANTE
 # ------------------------------------------------------------
-def background_hsv_gradient(img, t, hue0=10, hue1=140): #////////////////////////////
-    # Degradado vertical en HSV para cambiar “ambiente” por escena
-    hsv = np.zeros((H, W, 3), np.uint8) #// IMAGEN EN NEGRO
-    ys = np.linspace(0, 1, H, dtype=np.float32) #// POSCICION DEL PIXEL
-    hue = (hue0 + (hue1 - hue0) * ys + 10*np.sin(t*0.4 + ys*2.0)).astype(np.float32) ###// DEGRADADO
-    hsv[:, :, 0] = np.clip(hue, 0, 179).astype(np.uint8)[:, None] #// ANIMACION
-    hsv[:, :, 1] = 200 #/// COLOR
-    hsv[:, :, 2] = (40 + 120*(1 - ys)).astype(np.uint8)[:, None] #// BRILLO
-    img[:] = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR) #// BGR
+def background_solid(img, t, hue_base, sat=220, val=100):
+    """Fondo sólido que cambia de color lentamente"""
+    hue = (hue_base + int(t * 10)) % 180
+    color = hsv_to_bgr(hue, sat, val)
+    img[:] = color
+
+# ------------------------------------------------------------
+# LÍNEAS ANIMADAS
+# ------------------------------------------------------------
+def draw_animated_lines(img, t, color_hue, line_count=12):
+    """Dibuja líneas que se mueven y rotan"""
+    cx, cy = W//2, H//2
+    max_radius = int(min(W, H) * 0.45)
+    
+    for i in range(line_count):
+        angle = i * 2 * math.pi / line_count + t * 0.5
+        # Líneas que se extienden y contraen
+        length = max_radius * (0.6 + 0.3 * math.sin(t * 1.2 + i))
+        
+        x1 = int(cx + max_radius * 0.2 * math.cos(angle))
+        y1 = int(cy + max_radius * 0.2 * math.sin(angle))
+        x2 = int(cx + length * math.cos(angle))
+        y2 = int(cy + length * math.sin(angle))
+        
+        color = hsv_to_bgr((color_hue + i * 15) % 180, 220, 230)
+        cv2.line(img, (x1, y1), (x2, y2), color, 2, cv2.LINE_AA)
+
+def draw_animated_waves(img, t, color_hue):
+    """Ondas que se mueven horizontalmente"""
+    for y in range(0, H, 20):
+        offset = int(30 * math.sin(y * 0.02 + t * 3))
+        x = W//2 + offset
+        color = hsv_to_bgr((color_hue + y // 5) % 180, 200, 220)
+        cv2.line(img, (x - 40, y), (x + 40, y), color, 2, cv2.LINE_AA)
+
+def draw_rotating_rays(img, t, color_hue):
+    """Rayos que giran desde el centro"""
+    cx, cy = W//2, H//2
+    ray_count = 24
+    for i in range(ray_count):
+        angle = i * 2 * math.pi / ray_count + t * 0.8
+        x = int(cx + 400 * math.cos(angle))
+        y = int(cy + 400 * math.sin(angle))
+        color = hsv_to_bgr((color_hue + i * 10) % 180, 230, 240)
+        cv2.line(img, (cx, cy), (x, y), color, 1, cv2.LINE_AA)
 
 
-
+# ------------------------------------------------------------
+# ESCENAS
+# ------------------------------------------------------------
 def scene_credits(img, t):
-    background_hsv_gradient(img, t, hue0=165, hue1=105)
-    rng = np.random.default_rng(1)
-    xs = rng.integers(0, W, 380)
-    ys = rng.integers(0, int(H*0.65), 380)
-    img[ys, xs] = (255, 255, 255)
-    img[:] = cv2.GaussianBlur(img, (0,0), 0.6)
-
+    background_solid(img, t, 165, 200, 100)
+    draw_rotating_rays(img, t, 165)
+    
     titulo = "DEMO FIGURAS GEOMETRICAS"
     subtitulo = "OpenCV + Matematicas"
     nombre = "Estrella Abigail"
@@ -92,14 +116,11 @@ def scene_credits(img, t):
     cv2.putText(img, subtitulo, ((W-size2[0])//2, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.85, (220,220,220), 2, cv2.LINE_AA)
     cv2.putText(img, nombre, ((W-size3[0])//2, 360), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.85, (220,220,220), 2, cv2.LINE_AA)
 
-#///////////////// FRAME 1 /////////////////////////////
-# ============================================================
-# TORUS / LOTUS
-# ============================================================
-
-def scene_lotus(img, t, scale = 1.7): #/////////////// TERMINADA LOTUS OF LIFE /// CHECAR FONDO
-    background_hsv_gradient(img, t, 160, 30)
-    color = hsv_to_bgr(30, 240, 255)
+def scene_lotus(img, t, scale=1.7):
+    background_solid(img, t, 260, 200, 80)
+    draw_animated_lines(img, t, 260, 8)
+    
+    color = hsv_to_bgr(45, 255, 245)
     center = (400,300)
     petals = 24
     radio = int(90 * scale)
@@ -108,28 +129,56 @@ def scene_lotus(img, t, scale = 1.7): #/////////////// TERMINADA LOTUS OF LIFE /
         ang = 2*np.pi*i/petals + t*0.2
         x = int(center[0] + radio * np.cos(ang))
         y = int(center[1] + radio * np.sin(ang))
-        cv2.circle(img, (x,y), radio, color, 1, cv2.LINE_AA)
-        
-#///////////////// FRAME 2 /////////////////////////////
-def scene_rose_polar(img, t, scale = 0.9): ##///////////////// SEED OF LIFE //// 2/3 BIEN
-    background_hsv_gradient(img, t, hue0=100, hue1=60)
+        cv2.circle(img, (x,y), radio, color, 2, cv2.LINE_AA)
+    
+    cv2.circle(img, center, int(radio*0.4), hsv_to_bgr(40, 255, 255), -1)
 
+def scene_rose_polar(img, t, scale=1):
+    background_solid(img, t, 100, 210, 85)
+    draw_animated_waves(img, t, 100)
+    
     cx, cy = W//2, H//2
-    R = int(min(W, H) * 0.10 * scale)
-    pulsacion = 1.0 + 0.05 * math.sin(t*2.0)
+    R = int(min(W, H) * 0.12 * scale)
+    radio = int(R * 2.2)
+    rotacion = t * 0.3
+    pulsacion = 1.0 + 0.04 * math.sin(t*2.0)
+
     col = hsv_to_bgr(int(45 + 30*math.sin(t*0.6)), 230, 245)
-    cv2.circle(img, (cx, cy), int(R*pulsacion), col, 3, cv2.LINE_AA)
+    col_circulo = hsv_to_bgr(180, 255, 255)
+
+    cv2.circle(img, (cx, cy), int(R*pulsacion), col, 2, cv2.LINE_AA)
 
     for i in range(6):
-        angle = i * math.pi * 2 / 6 + t*0.25
+        angle = i * math.pi * 2 / 6 + rotacion
         x = int(cx + R * math.cos(angle))
         y = int(cy + R * math.sin(angle))
         cv2.circle(img, (x, y), int(R*pulsacion), col, 2, cv2.LINE_AA)
 
-        
-#///////////////// FRAME 3 /////////////////////////////
-def scene_spirograph(img, t, scale = 0.9):
-    background_hsv_gradient(img, t, hue0=50, hue1=10)
+    paso = 0.01
+    t_local = max(0, t - 20)
+    duracion = 3
+    progreso = (t_local % duracion) / duracion
+    borrado = progreso * 2*np.pi
+
+    for ang in np.arange(0, 2*np.pi + paso, paso):
+        x = int(cx + radio * np.cos(ang))
+        y = int(cy + radio * np.sin(ang))
+
+        if ang > borrado: 
+            cv2.circle(img, (x, y), 2, col_circulo, -1)
+        else:
+            dx = np.cos(ang)
+            dy = np.sin(ang)
+            fuerza = min((borrado - ang) * 5, 10)
+            px = int(x + dx * fuerza)
+            py = int(y + dy * fuerza)
+            px += np.random.randint(-2, 3)
+            py += np.random.randint(-2, 3)
+            cv2.circle(img, (px, py), 1, col_circulo, -1)
+
+def scene_spirograph(img, t, scale=0.9):
+    background_solid(img, t, 30, 210, 90)
+    draw_rotating_rays(img, t, 30)
 
     cx, cy = W//2, H//2
     R = int(min(W, H) * 0.07 * scale)
@@ -149,122 +198,170 @@ def scene_spirograph(img, t, scale = 0.9):
         x = int(cx + R2 * math.cos(angle))
         y = int(cy + R2 * math.sin(angle))
         cv2.circle(img, (x, y), R, col, 1, cv2.LINE_AA)
-
-    cv2.circle(img, (cx, cy), int(R2+R), col, 2, cv2.LINE_AA)
     
+    radio = R2 + R
+    t_local = t - 30
+    rotacion = t_local * 0.8
+    col_circulo = hsv_to_bgr(280, 255, 255)
+    theta_max = min(2*np.pi, t_local * 1.8)
+    paso = max(0.005, 0.08 - t_local * 0.01)
 
-#///////////////// FRAME 4 /////////////////////////////
-def scene_particles(img, t, rng, scale = 0.9): #/////////// SRI YANTRA // INTENTO DE :(/// CHECAR SI SE ARREGLA
-    background_hsv_gradient(img, t, hue0=140, hue1=180)
+    for ang in np.arange(0, theta_max, paso):
+        x = int(cx + radio * np.cos(ang + rotacion))
+        y = int(cy + radio * np.sin(ang + rotacion))
+        cv2.circle(img, (x, y), 2, col_circulo, -1)
+
+def scene_particles(img, t, rng, scale=1):
+    background_solid(img, t, 220, 220, 75)
+    draw_animated_lines(img, t, 220, 10)
 
     cx, cy = W//2, H//2
-    radios_up = [0.24, 0.21, 0.18, 0.15]
-    radios_down = [0.22, 0.19, 0.16, 0.13, 0.10]
     zoom = 1.0 + 0.04 * math.sin(t*1.5)
 
     def triangulo(rotation, pointing_up, radio_val):
         R = int(min(W, H) * radio_val * scale * zoom)
         pts = []
-
         for i in range(3):
             angle = rotation + i * 2 * math.pi / 3
-
             if not pointing_up:
                 angle += math.pi
-                
             x = int(cx + R * math.cos(angle))
             y = int(cy + R * math.sin(angle))
-
             pts.append([x, y])
         return np.array([pts], np.int32)
 
     for i in range(4):
         rot = math.radians(angulos_up[i] * 100) + t*0.03
-        pts = triangulo(rot, True, radios_up[i])
+        pts = triangulo(rot, True, angulos_up[i])
         col = hsv_to_bgr(300 + 20*i, 220, 240)
         cv2.polylines(img, pts, True, col, 2, cv2.LINE_AA)
 
     for i in range(5):
         rot = math.radians(angulos_down[i] * 100) - t*0.03
-        pts = triangulo(rot, False, radios_down[i])
+        pts = triangulo(rot, False, angulos_down[i])
         col = hsv_to_bgr(60 + 15*i, 220, 240)
         cv2.polylines(img, pts, True, col, 2, cv2.LINE_AA)
-        
-        
-#///////////////////// FRAME 5 /////////////////////////// ROSA POLAR
-def scene_final(img, t, scale = 0.9):
-    background_hsv_gradient(img, t, hue0=120, hue1=165)
+
+def scene_final(img, t, scale=0.9):
+    background_solid(img, t, 140, 220, 85)
+    draw_animated_waves(img, t, 140)
 
     cx, cy = W//2, H//2
-
     R = int(120 * scale)
-
     col = hsv_to_bgr(int(145 + 25*np.sin(t*0.5)), 220, 245)
-
     deform = 1.0 + 0.08 * math.sin(t*1.2)
 
     for i in range(6):
         angle = i * math.pi * 2 / 6 + t * 0.35
-
         x = int(cx + R/1.8 * math.cos(angle))
         y = int(cy + R/1.8 * math.sin(angle))
-
-        axes = (int((R/1.3)*deform), int(R/4))
-
+        axes = (int((R/1.3)*deform), int(R/6))
         cv2.ellipse(img, (x, y), axes, math.degrees(angle), 0, 360, col, 2, cv2.LINE_AA)
 
     cv2.circle(img, (cx, cy), int(R/3), col, 2, cv2.LINE_AA)
-    cv2.circle(img, (cx, cy), int(R * 1.15), col, 2, cv2.LINE_AA)
+
+#///////////////// ESCENA 6 - FRUIT OF LIFE /////////////////////////////
+def scene_fruit_of_life(img, t, scale=1.1):
+    """Fruit of Life - 13 círculos interconectados formando una flor de la vida"""
+    background_solid(img, t, 320, 230, 80)
+    draw_rotating_rays(img, t, 320)
     
-#///////////////// FRAME 6 /////////////////////////////
-def scene_fire(img, t, state, scale = 0.9): #////FRUIT OF LIFE //// esta mal
-    background_hsv_gradient(img, t, hue0=40, hue1=80)
- 
+    cx, cy = W//2, H//2
+    R = int(100 * scale)
+    
+    # Colores que cambian con el tiempo
+    col_principal = hsv_to_bgr(int(45 + 20*math.sin(t*0.5)), 255, 245)
+    col_secundario = hsv_to_bgr(int(180 + 30*math.sin(t*0.7)), 240, 230)
+    col_terciario = hsv_to_bgr(int(300 + 25*math.sin(t*0.6)), 235, 240)
+    
+    # Centro
+    cv2.circle(img, (cx, cy), R, col_principal, 2, cv2.LINE_AA)
+    cv2.circle(img, (cx, cy), int(R*0.25), col_principal, -1)
+    
+    # Primer anillo (6 círculos alrededor del centro)
+    angulos = [0, 60, 120, 180, 240, 300]
+    radio_anillo1 = R
+    
+    for ang in angulos:
+        ang_rad = math.radians(ang)
+        x = int(cx + radio_anillo1 * math.cos(ang_rad))
+        y = int(cy + radio_anillo1 * math.sin(ang_rad))
+        cv2.circle(img, (x, y), R, col_secundario, 2, cv2.LINE_AA)
+    
+    # Segundo anillo (6 círculos adicionales)
+    radio_anillo2 = R * 1.732  # sqrt(3) * R
+    for ang in angulos:
+        ang_rad = math.radians(ang + 30)
+        x = int(cx + radio_anillo2 * math.cos(ang_rad))
+        y = int(cy + radio_anillo2 * math.sin(ang_rad))
+        cv2.circle(img, (x, y), R, col_terciario, 2, cv2.LINE_AA)
+    
+    # Líneas conectivas animadas
+    for i in range(12):
+        ang = i * 30
+        ang_rad = math.radians(ang + t * 20)
+        radio_linea = R * 1.2
+        x1 = int(cx + radio_linea * math.cos(ang_rad - 0.3))
+        y1 = int(cy + radio_linea * math.sin(ang_rad - 0.3))
+        x2 = int(cx + radio_linea * math.cos(ang_rad + 0.3))
+        y2 = int(cy + radio_linea * math.sin(ang_rad + 0.3))
+        
+        color_linea = hsv_to_bgr((320 + i * 15 + int(t*30)) % 180, 240, 250)
+        cv2.line(img, (x1, y1), (x2, y2), color_linea, 1, cv2.LINE_AA)
+    
+    # Partículas decorativas que orbitan
+    for i in range(36):
+        ang_part = i * 10 + t * 50
+        ang_rad = math.radians(ang_part)
+        radio_part = R * 2.2
+        x = int(cx + radio_part * math.cos(ang_rad))
+        y = int(cy + radio_part * math.sin(ang_rad))
+        
+        # Brillo pulsante
+        brillo = 200 + 55 * math.sin(t*3 + i)
+        color_part = hsv_to_bgr((ang_part + int(t*50)) % 180, 255, brillo)
+        cv2.circle(img, (x, y), 3, color_part, -1)
 
 
 # ------------------------------------------------------------
 # CONTROLADOR DE ESCENAS
 # ------------------------------------------------------------
-def render_scene(buf, scene_id, t, rng, fire_state):
+def render_scene(buf, scene_id, t, rng):
     if scene_id == 0:
         scene_credits(buf, t)
     elif scene_id == 1:
-        scene_lotus(buf, t, scale = 1.4)     
+        scene_lotus(buf, t, scale=1.4)     
     elif scene_id == 2:
-        scene_rose_polar(buf, t, scale = 1.4) 
+        scene_rose_polar(buf, t, scale=1.7) 
     elif scene_id == 3:
-        scene_spirograph(buf, t, scale = 1.7) ##/// TAMAÑO
+        scene_spirograph(buf, t, scale=1.7)
     elif scene_id == 4:
-        scene_particles(buf, t, rng, scale = 1.5 )
+        scene_particles(buf, t, rng, scale=1.7)
     elif scene_id == 5:
-        scene_final(buf, t, scale= 1.9)
-    else:
-        scene_fire(buf, t, fire_state, scale= 1.5)
-        
-        
+        scene_final(buf, t, scale=1.9)
+    elif scene_id == 6:
+        scene_fruit_of_life(buf, t, scale=1.2)
+
 # ------------------------------------------------------------
-# TIMELINE GENERAL
+# TIMELINE GENERAL - 7 escenas de 10 segundos = 70 segundos
 # ------------------------------------------------------------
-def timeline(t, rng, bufA, bufB, fire_state):
-    # 6 escenas (0..5) con 5 transiciones entre ellas
-    # Duración 60s -> 6 bloques de 10s
+def timeline(t, rng, bufA, bufB):
+    # 7 escenas (0..6) con transiciones entre ellas
     block = int(min(6, max(0, t // 10)))
     t_in = t - block*10
 
-    # Render escena base
-    render_scene(bufA, block, t, rng, fire_state)
+    render_scene(bufA, block, t, rng)
     frame = bufA
 
-    # 5 transiciones: de s a s+1 en los últimos 1.2s de cada bloque
-    if block < 6 and t_in >= 8.8: #/////////// 6 ESCENAS
-        render_scene(bufA, block, t, rng, fire_state)
-        render_scene(bufB, block+1, t, rng, fire_state)
+    # Transiciones entre escenas
+    if block < 6 and t_in >= 8.8:
+        render_scene(bufA, block, t, rng)
+        render_scene(bufB, block+1, t, rng)
         a = smoothstep(8.8, 10.0, t_in)
         frame = cv2.addWeighted(bufA, 1-a, bufB, a, 0)
-        # pequeño “flash” al final de transición
         flash = smoothstep(9.6, 10.0, t_in)
         if flash > 0:
-            frame = cv2.addWeighted(frame, 1.0, np.full_like(frame, 255), 0.12*flash, 0)
+            frame = cv2.addWeighted(frame, 1.0, np.full_like(frame, 255), 0.1*flash, 0)
 
     # Fade in/out global
     fin = smoothstep(0.0, 1.5, t)
@@ -279,18 +376,13 @@ def main():
     bufA = np.zeros((H, W, 3), np.uint8)
     bufB = np.zeros((H, W, 3), np.uint8)
 
-    fire_state = {
-        "heat": np.zeros((H, W), np.float32),
-        "rng": np.random.default_rng(999),
-    }
-
     total_frames = int(DURATION * FPS)
     t0 = time.perf_counter()
     for i in range(total_frames):
         t = i / FPS
-        frame = timeline(t, rng, bufA, bufB, fire_state)
-        frame = post_vignette(frame, 0.72)
-        frame = post_scanlines(frame, 0.16)
+        frame = timeline(t, rng, bufA, bufB)
+        frame = post_vignette(frame, 0.5)
+        frame = post_scanlines(frame, 0.12)
         frame = post_posterize(frame, 24)
         cv2.imshow("Proyecto Final: demo procedural (OpenCV)", frame)
         if cv2.waitKey(1) & 0xFF == 27:
