@@ -2,6 +2,7 @@ import pygame
 import cv2
 import mediapipe as mp
 import math
+import numpy as np
 import os  # <-- Corregido: Necesario para solucionar el bug de rutas en Windows
 from pygame.locals import *
 
@@ -12,6 +13,16 @@ from OpenGL.GLU import *
 WIDTH = 1280
 HEIGHT = 720
 FPS = 60
+
+# Variables de animación.
+fountain_angle = 0.0
+water_bob = 0.0
+
+HAND_CONNECTIONS = [
+    (0, 1), (1, 2), (2, 3), (3, 4),       # Pulgar
+    (0, 5), (5, 6), (6, 7), (7, 8),       # Índice
+    (5, 9), (9, 10), (10, 11), (11, 12)   # Medio
+]
 
 # Posición inicial de la cámara.
 camera_x = 0.0
@@ -620,7 +631,7 @@ def update_keyboard(keys):
 # ============================================================
 
 def update_mediapipe():
-    global hand_yaw_offset, hand_pitch_offset
+    global hand_yaw_offset, hand_pitch_offset, camera_z
 
     ret, frame = cap.read()
 
@@ -630,26 +641,60 @@ def update_mediapipe():
         return
 
     frame = cv2.flip(frame, 1)
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    h, w, c = frame.shape
     
-    # Corregido: Se cambió 'hands' por 'hands_detector' para que coincida con la definición inicial
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands_detector.process(rgb_frame)
 
     if result.multi_hand_landmarks:
         hand_landmarks = result.multi_hand_landmarks[0]
+        
+        # Guardar solo los puntos necesarios (hasta el dedo medio, landmark 12 es suficiente)
+        keypoints = []
+        for i, landmark in enumerate(hand_landmarks.landmark):
+            if i <= 12:  # Solo procesamos los primeros 13 puntos (0 al 12)
+                cx, cy = int(landmark.x * w), int(landmark.y * h)
+                keypoints.append((cx, cy))
+            else:
+                keypoints.append((0, 0)) # Relleno para mantener consistencia de índices
+            
+        # 1. Dibujar el esqueleto limitado a 3 dedos
+        for connection in HAND_CONNECTIONS:
+            start_idx = connection[0]
+            end_idx = connection[1]
+            if keypoints[start_idx] != (0,0) and keypoints[end_idx] != (0,0):
+                cv2.line(frame, keypoints[start_idx], keypoints[end_idx], (0, 255, 0), 2)
+        
+        # 2. Control de Zoom y Línea Roja (Pulgar [4] e Índice [8])
+        x1, y1 = keypoints[4]
+        x2, y2 = keypoints[8]
+        
+        cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 3)
+        
+        # Calcular distancia matemática
+        distancia_dedos = math.hypot(x2 - x1, y2 - y1)
+        cx_medio, cy_medio = (x1 + x2) // 2, (y1 + y2) // 2
+        
+        # Mapear la distancia de pixeles (ej. de 30px a 200px) al rango Z de la cámara (ej. de 40.0 lejano a 5.0 cercano)
+        # Ajusta los números si quieres que el zoom sea más o menos sensible
+        camera_z = float(np.interp(distancia_dedos, [40, 220], [45.0, 5.0]))
+        
+        # Mostrar la distancia en pantalla
+        cv2.putText(frame, f"Zoom: {int(distancia_dedos)} px", (cx_medio, cy_medio), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 255), 2)
 
+        # 3. Control de rotación (Mantiene tu lógica original con el índice)
         index_tip = hand_landmarks.landmark[8]
-
-        x = index_tip.x
-        y = index_tip.y
-
-        hand_yaw_offset = (x - 0.5) * 45.0
-        hand_pitch_offset = -(y - 0.5) * 28.0
+        hand_yaw_offset = (index_tip.x - 0.5) * 45.0
+        hand_pitch_offset = -(index_tip.y - 0.5) * 28.0
 
     else:
         hand_yaw_offset *= 0.92
         hand_pitch_offset *= 0.92
 
+    # Mostrar la cámara con los 3 dedos detectados
+    cv2.imshow("Deteccion de Manos - Vista de Camara", frame)
+    cv2.waitKey(1)
 
 # ============================================================
 # CONTROL CON RATÓN
@@ -750,6 +795,12 @@ def main():
 
         pygame.display.flip()
 
+    # ... (Final de tu ciclo while running en main)
+    cap.release()
+    hands_detector.close()
+    cv2.destroyAllWindows()  # <--- Limpieza total de ventanas de OpenCV
+    pygame.quit()
+    
     cap.release()
     # Corregido: Se cambió 'hands.close()' por 'hands_detector.close()'
     hands_detector.close()
