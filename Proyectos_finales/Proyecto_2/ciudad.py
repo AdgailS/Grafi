@@ -17,6 +17,7 @@ FPS = 60
 # Variables de animación.
 fountain_angle = 0.0
 water_bob = 0.0
+wing_angle = 0.0  # aleteo de gaviotas
 
 HAND_CONNECTIONS = [
     (0, 1), (1, 2), (2, 3), (3, 4),       # Pulgar
@@ -434,6 +435,7 @@ def draw_church():
 # ============================================================
 
 def draw_ground():
+    # Base verde del pasto
     draw_cube(0, -0.12, -5, 90, 0.12, 90, (0.28, 0.62, 0.28))
 
 
@@ -441,135 +443,398 @@ def draw_roads():
     road_color = (0.30, 0.30, 0.30)
     road_line = (0.86, 0.82, 0.64)
 
-    # Calle principal hacia la iglesia.
-    draw_cube(0, 0.01, -7, 6.0, 0.06, 48.0, road_color)
+    # --- CALLE PRINCIPAL VERTICAL (INTERRUMPIDA POR LA PLAZA) ---
+    # Avenida Norte: Va desde el norte de la plaza (Z = -10.0) hasta la iglesia (Z = -25.5)
+    draw_cube(0, 0.01, -17.75, 6.0, 0.06, 15.5, road_color)
+    
+    # Avenida Sur: Va desde el sur de la plaza (Z = 5.0) hasta el final del mapa (Z = 25.0)
+    draw_cube(0, 0.01, 15.0, 6.0, 0.06, 20.0, road_color)
 
-    # Calle horizontal frente a la plaza.
-    draw_cube(0, 0.02, 5.5, 50.0, 0.06, 5.3, road_color)
+    # --- CALLES HORIZONTALES PRINCIPALES ---
+    # Calle Horizontal Norte (Atrás de la plaza, frente a la Iglesia): Ubicada en Z = -12.25 (ancho 4.5)
+    draw_cube(0, 0.02, -12.25, 50.0, 0.06, 4.5, road_color)
+    
+    # Calle Horizontal Sur (Frente a la plaza): Ubicada en Z = 6.5 (ancho 5.3)
+    draw_cube(0, 0.02, 6.5, 50.0, 0.06, 5.3, road_color)
 
-    # Calle horizontal trasera.
-    draw_cube(0, 0.02, -14.5, 44.0, 0.06, 4.5, road_color)
+    # --- CALLES LATERALES ---
+    # Movidas ligeramente a X = -19.5 y X = 19.5 para que las casas del centro tengan más espacio
+    draw_cube(-19.5, 0.02, -3.0, 4.5, 0.06, 40.0, road_color)
+    draw_cube(19.5, 0.02, -3.0, 4.5, 0.06, 40.0, road_color)
 
-    # Calles laterales.
-    draw_cube(-17, 0.02, -6, 4.5, 0.06, 36.0, road_color)
-    draw_cube(17, 0.02, -6, 4.5, 0.06, 36.0, road_color)
-
-    # Líneas decorativas centrales.
-    for z in range(-28, 16, 6):
-        draw_cube(0, 0.07, z, 0.25, 0.04, 2.3, road_line)
-
-    for x in range(-22, 25, 7):
-        draw_cube(x, 0.08, 5.5, 2.5, 0.04, 0.20, road_line)
-        draw_cube(x, 0.08, -14.5, 2.5, 0.04, 0.20, road_line)
+    # --- LÍNEAS DE CARRIL ---
+    # Líneas Avenida Norte
+    for z in range(-24, -13, 4):
+        draw_cube(0, 0.07, z, 0.25, 0.04, 1.5, road_line)
+    # Líneas Avenida Sur
+    for z in range(10, 24, 4):
+        draw_cube(0, 0.07, z, 0.25, 0.04, 1.5, road_line)
+    # Líneas Horizontales (Evitando pintar sobre las intersecciones centrales)
+    for x in range(-22, 23, 7):
+        if abs(x) > 3:
+            draw_cube(x, 0.08, 6.5, 2.5, 0.04, 0.20, road_line)
+            draw_cube(x, 0.08, -12.25, 2.5, 0.04, 0.20, road_line)
 
 
 def draw_plaza():
-    # Base de la plaza.
+    # Base de la plaza centrada (15x15). Va de X=[-7.5, 7.5] y Z=[-10, 5]
     draw_cube(0, 0.06, -2.5, 15.0, 0.12, 15.0, (0.56, 0.56, 0.54))
 
-    # Andadores internos.
+    # Andadores internos
     draw_cube(0, 0.12, -2.5, 14.2, 0.05, 2.0, (0.68, 0.66, 0.60))
     draw_cube(0, 0.13, -2.5, 2.0, 0.05, 14.2, (0.68, 0.66, 0.60))
 
-    # Esquinas verdes de jardín.
+    # Esquinas de jardín del parque
     draw_cube(-4.5, 0.15, -7.0, 4.5, 0.08, 4.5, (0.18, 0.52, 0.22))
     draw_cube(4.5, 0.15, -7.0, 4.5, 0.08, 4.5, (0.18, 0.52, 0.22))
     draw_cube(-4.5, 0.15, 2.0, 4.5, 0.08, 4.5, (0.18, 0.52, 0.22))
     draw_cube(4.5, 0.15, 2.0, 4.5, 0.08, 4.5, (0.18, 0.52, 0.22))
 
-    # Bordes de plaza.
-    draw_cube(0, 0.22, 5.0, 15.3, 0.25, 0.35, (0.38, 0.38, 0.36))
-    draw_cube(0, 0.22, -10.0, 15.3, 0.25, 0.35, (0.38, 0.38, 0.36))
-    draw_cube(-7.5, 0.22, -2.5, 0.35, 0.25, 15.3, (0.38, 0.38, 0.36))
-    draw_cube(7.5, 0.22, -2.5, 0.35, 0.25, 15.3, (0.38, 0.38, 0.36))
+    # Guarniciones/Bordes de la plaza (X = +-7.5 y Z = -10, 5)
+    draw_cube(0, 0.22, 4.85, 15.0, 0.25, 0.3, (0.38, 0.38, 0.36))
+    draw_cube(0, 0.22, -9.85, 15.0, 0.25, 0.3, (0.38, 0.38, 0.36))
+    draw_cube(-7.35, 0.22, -2.5, 0.3, 0.25, 15.0, (0.38, 0.36, 0.36))
+    draw_cube(7.35, 0.22, -2.5, 0.3, 0.25, 15.0, (0.38, 0.36, 0.36))
 
-    # Fuente central.
+    # Fuente central animada: PERFECTAMENTE EN EL CENTRO DE LA PLAZA (0,0,-2.5)
+    glPushMatrix()
+    glTranslatef(0, 0, -2.5)
     draw_fountain()
+    glPopMatrix()
 
-    # Bancas.
+    # Bancas orientadas hacia el centro geométrico de la plaza
     draw_bench(-4.8, -2.5, 90)
     draw_bench(4.8, -2.5, -90)
-    draw_bench(0, 2.7, 180)
-    draw_bench(0, -7.7, 0)
+    draw_bench(0, 2.2, 180)
+    draw_bench(0, -7.2, 0)
 
-    # Faroles.
-    draw_lamp_post(-6.3, 3.8)
-    draw_lamp_post(6.3, 3.8)
-    draw_lamp_post(-6.3, -8.8)
-    draw_lamp_post(6.3, -8.8)
+###################################################################
+"""Faroles del parque en sus esquinas internas
+    draw_lamp_post(-6.5, 3.8)
+    draw_lamp_post(6.8, 3.8)
+    draw_lamp_post(-6.8, -8.8)
+    draw_lamp_post(6.8, -8.8)"""
+
+def draw_gaviota(x, y, z, rotation_y=0):
+    glPushMatrix()
+    glTranslatef(x, y, z)
+    glRotatef(rotation_y, 0, 1, 0)
+    
+    # Cuerpo/Cabeza central (blanco/gris claro)
+    draw_cube(0, 0, 0, 0.4, 0.12, 0.12, (0.9, 0.9, 0.9))
+    # Pico (amarillo)
+    draw_cube(0.22, 0, 0, 0.1, 0.06, 0.06, (0.95, 0.8, 0.2))
+    
+    # Ala Izquierda
+    glPushMatrix()
+    glTranslatef(-0.15, 0, 0)
+    glRotatef(wing_angle, 0, 0, 1) # Aleteo
+    glTranslatef(-0.3, 0, 0)
+    draw_cube(0, 0, 0, 0.6, 0.04, 0.18, (0.8, 0.8, 0.8))
+    glPopMatrix()
+    
+    # Ala Derecha
+    glPushMatrix()
+    glTranslatef(0.15, 0, 0)
+    glRotatef(-wing_angle, 0, 0, 1) # Aleteo simétrico
+    glTranslatef(0.3, 0, 0)
+    draw_cube(0, 0, 0, 0.6, 0.04, 0.18, (0.8, 0.8, 0.8))
+    glPopMatrix()
+
+    glPopMatrix()
+    
+    
+def draw_persona(x, z, color_camisa, color_pantalon, rotation=0):
+    glPushMatrix()
+    glTranslatef(x, 0, z)
+    glRotatef(rotation, 0, 1, 0)
+    
+    # Piernas / Pantalón
+    draw_cube(0, 0.3, 0, 0.25, 0.6, 0.2, color_pantalon)
+    
+    # Torso / Camisa
+    draw_cube(0, 0.85, 0, 0.35, 0.5, 0.22, color_camisa)
+    
+    # Cabeza (Color piel low-poly)
+    draw_sphere(0, 1.25, 0, 0.14, (0.92, 0.76, 0.62))
+    
+    glPopMatrix()
+    
+def draw_perrito(x, z, rotation=0):
+    """Dibuja un perrito low-poly usando cubos"""
+    glPushMatrix()
+    glTranslatef(x, 0.0, z)
+    glRotatef(rotation, 0, 1, 0)
+    
+    # Cuerpo (Marrón)
+    draw_cube(0.0, 0.3, 0.0, 0.4, 0.2, 0.2, (0.55, 0.27, 0.07))
+    # Cabeza
+    draw_cube(0.22, 0.45, 0.0, 0.16, 0.16, 0.16, (0.55, 0.27, 0.07))
+    # Hocico
+    draw_cube(0.32, 0.41, 0.0, 0.08, 0.08, 0.1, (0.35, 0.16, 0.14))
+    # Orejas (Negras/Café oscuro)
+    draw_cube(0.18, 0.53, 0.09, 0.04, 0.1, 0.04, (0.2, 0.1, 0.05))
+    draw_cube(0.18, 0.53, -0.09, 0.04, 0.1, 0.04, (0.2, 0.1, 0.05))
+    # Patas (4 cubos delgados)
+    draw_cube(0.12, 0.1, 0.07, 0.06, 0.2, 0.06, (0.55, 0.27, 0.07))
+    draw_cube(0.12, 0.1, -0.07, 0.06, 0.2, 0.06, (0.55, 0.27, 0.07))
+    draw_cube(-0.12, 0.1, 0.07, 0.06, 0.2, 0.06, (0.55, 0.27, 0.07))
+    draw_cube(-0.12, 0.1, -0.07, 0.06, 0.2, 0.06, (0.55, 0.27, 0.07))
+    # Cola
+    draw_cube(-0.22, 0.4, 0.0, 0.06, 0.16, 0.06, (0.55, 0.27, 0.07))
+    
+    glPopMatrix()
+
+def draw_coche_base(x, z, color_cuerpo, rotation=0, es_emergencia=False, color_luces=None):
+    """Base geométrica para vehículos (Coche, Policía, Ambulancia)"""
+    glPushMatrix()
+    glTranslatef(x, 0.01, z) # Ligeramente arriba del asfalto
+    glRotatef(rotation, 0, 1, 0)
+    
+    color_llanta = (0.1, 0.1, 0.1)
+    
+    # Llantas corregidas: rotamos con OpenGL antes de dibujar cada cilindro
+    # Llanta 1
+    glPushMatrix()
+    glTranslatef(0.7, 0.2, 0.45)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.22, 0.1, color_llanta)
+    glPopMatrix()
+    
+    # Llanta 2
+    glPushMatrix()
+    glTranslatef(0.7, 0.2, -0.45)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.22, 0.1, color_llanta)
+    glPopMatrix()
+    
+    # Llanta 3
+    glPushMatrix()
+    glTranslatef(-0.7, 0.2, 0.45)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.22, 0.1, color_llanta)
+    glPopMatrix()
+    
+    # Llanta 4
+    glPushMatrix()
+    glTranslatef(-0.7, 0.2, -0.45)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.22, 0.1, color_llanta)
+    glPopMatrix()
+    
+    # Chasis / Cuerpo inferior
+    draw_cube(0.0, 0.4, 0.0, 1.8, 0.4, 0.9, color_cuerpo)
+    
+    # Cabina / Techo superior (si es ambulancia es más larga)
+    largo_cabina = 1.4 if es_emergencia else 1.0
+    alto_cabina = 0.7 if es_emergencia else 0.45
+    y_cabina = 0.95 if es_emergencia else 0.8
+    draw_cube(-0.1, y_cabina, 0.0, largo_cabina, alto_cabina, 0.82, (0.9, 0.9, 0.9) if es_emergencia else color_cuerpo)
+    
+    # Parabrisas / Ventanas
+    draw_cube(0.42, 0.75, 0.0, 0.02, 0.3, 0.76, (0.2, 0.2, 0.2)) # Enfrente
+    
+    # Luces de emergencia (Sirenas de Policía / Ambulancia)
+    if color_luces:
+        draw_cube(-0.1, y_cabina + alto_cabina/2 + 0.05, 0.2, 0.15, 0.1, 0.15, color_luces[0]) # Azul o Rojo
+        draw_cube(-0.1, y_cabina + alto_cabina/2 + 0.05, -0.2, 0.15, 0.1, 0.15, color_luces[1]) # Rojo o Azul
+        
+    glPopMatrix()
 
 
+def draw_moto(x, z, color_moto, rotation=0):
+    """Dibuja una motocicleta low-poly de perfil delgado con ruedas corregidas"""
+    glPushMatrix()
+    glTranslatef(x, 0.01, z)
+    glRotatef(rotation, 0, 1, 0)
+    
+    color_llanta = (0.1, 0.1, 0.1)
+    
+    # Rueda Delantera corregida
+    glPushMatrix()
+    glTranslatef(0.6, 0.25, 0.0)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.25, 0.08, color_llanta)
+    glPopMatrix()
+    
+    # Rueda Trasera corregida
+    glPushMatrix()
+    glTranslatef(-0.6, 0.25, 0.0)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0, 0, 0, 0.25, 0.08, color_llanta)
+    glPopMatrix()
+    
+    # Cuerpo central / Motor
+    draw_cube(0.0, 0.4, 0.0, 0.8, 0.3, 0.18, (0.3, 0.3, 0.3))
+    # Tanque de gasolina / Asiento
+    draw_cube(-0.1, 0.6, 0.0, 0.7, 0.15, 0.22, color_moto)
+    
+    # Manubrio (Cilindro largo horizontal)
+    glPushMatrix()
+    glTranslatef(0.4, 0.75, -0.2)
+    draw_cylinder(0, 0, 0, 0.03, 0.4, (0.2, 0.2, 0.2))
+    glPopMatrix()
+    
+    glPopMatrix()
+
+def draw_nube(x, y, z):
+    """Dibuja una nube esponjosa uniendo varios cubos blancos a distintas escalas"""
+    glPushMatrix()
+    glTranslatef(x, y, z)
+    color_nube = (0.95, 0.95, 0.95)
+    
+    # Bloque central
+    draw_cube(0.0, 0.0, 0.0, 3.0, 1.0, 1.8, color_nube)
+    # Bloques satélite para dar textura irregular low-poly
+    draw_cube(-1.5, -0.2, 0.2, 1.2, 0.7, 1.2, color_nube)
+    draw_cube(1.4, -0.1, -0.2, 1.5, 0.8, 1.3, color_nube)
+    draw_cube(0.2, 0.5, 0.1, 1.6, 0.7, 1.4, color_nube)
+    
+    glPopMatrix()
+    
+    
 # ============================================================
 # DISTRIBUCIÓN DEL PUEBLO
 # ============================================================
+def draw_all_vehiculos():
+    """Alinea los vehículos en la dirección correcta del carril (rotation=0 o 180)"""
+    # 1. Coche Rojo: Avanzando derecho por el carril de la Avenida Sur (X = 1.5, Z = 16.0), mirando al Norte (rotation=0)
+    draw_coche_base(1.5, 16.0, (0.8, 0.1, 0.1), rotation=90)
+    
+    # 2. Patrulla de Policía: Avanzando o estacionada en la Calle Horizontal Norte (X = -11.0, Z = -12.25), paralela al asfalto (rotation=90)
+    draw_coche_base(-11.0, -12.25, (0.05, 0.05, 0.05), rotation=180, color_luces=((0.0, 0.0, 1.0), (1.0, 0.0, 0.0)))
+    
+    # 3. Ambulancia: Avanzando por el carril de la Avenida Norte (X = 1.5, Z = -18.0), mirando hacia el Norte/Iglesia (rotation=0)
+    draw_coche_base(1.5, -18.0, (0.9, 0.9, 0.9), rotation=90, es_emergencia=True, color_luces=((1.0, 0.0, 0.0), (1.0, 0.0, 0.0)))
+    
+    # 4. Motocicleta: Recorriendo limpiamente la calle lateral izquierda (X = -19.5, Z = -2.0), mirando al norte (rotation=0)
+    draw_moto(-19.5, -2.0, (0.9, 0.8, 0.0), rotation=90)
+
+
+def draw_all_mascotas():
+    perrito_positions = [
+        (-4.5, -2.5, 45),
+        (-4.5, 0.5, -30),
+        (-16.5, 1.0, 120)
+    ]
+    for x, z, rot in perrito_positions:
+        draw_perrito(x, z, rotation=rot)
+
+def draw_all_nubes():
+    """Genera el cielo poblando el mapa con nubes altas"""
+    nube_positions = [
+        (-15.0, 22.0, -25.0),
+        (10.0, 25.0, -30.0),
+        (-25.0, 24.0, 5.0),
+        (20.0, 21.0, 15.0),
+        (0.0, 26.0, 0.0),      # Una nube grande sobre la vertical de la plaza
+        (-5.0, 23.0, -10.0)
+    ]
+    for x, y, z in nube_positions:
+        draw_nube(x, y, z)
+
+def draw_all_gaviotas():
+    # Posiciones (x, y, z) y rotación en el eje Y para cada ave
+    gaviota_positions = [
+        (-5.0, 14.0, -2.0, 45),
+        (6.0, 16.0, -10.0, -30),
+        (0.0, 15.5, -22.0, 90),   # Volando cerca del campanario
+        (-15.0, 13.0, -5.0, 120),  # Sobre las casas izquierdas
+        (12.0, 15.0, 5.0, -60),    # Cerca de la entrada
+        (-2.0, 17.0, -12.0, 180)   # Cruzando la plaza alta
+    ]
+
+    for x, y, z, rot_y in gaviota_positions:
+        draw_gaviota(x, y, z, rotation_y=rot_y)
+        
+def draw_all_personas():
+    """Ubicación de peatones en andadores y banquetas"""
+    persona_positions = [
+        (-3.5, -2.5, 90, 0, 1),
+        (2.5, -4.0, -90, 2, 3),
+        (0.8, 1.5, 180, 4, 1),
+        (-4.0, 1.0, -45, 1, 2),
+        (-5.5, 9.5, 0, 3, 0),   
+        (5.5, 9.5, 0, 0, 4),    
+        (-3.5, -24.0, 45, 2, 1),
+        (-16.0, 2.0, 135, 4, 3)
+    ]
+    colores = [(0.8, 0.2, 0.2), (0.1, 0.1, 0.5), (0.2, 0.7, 0.3), (0.9, 0.7, 0.1), (0.5, 0.2, 0.7)]
+    for x, z, rot, idx_camisa, idx_pantalon in persona_positions:
+        draw_persona(x, z, colores[idx_camisa], colores[idx_pantalon], rotation=rot)
 
 def draw_all_houses():
-    # Colores low-poly.
-    cream = (0.92, 0.76, 0.48)
-    salmon = (0.92, 0.48, 0.36)
-    blue = (0.50, 0.70, 0.88)
-    green = (0.55, 0.78, 0.52)
-    purple = (0.75, 0.55, 0.80)
-    orange = (0.92, 0.62, 0.34)
-    white = (0.88, 0.84, 0.76)
-    yellow = (0.95, 0.80, 0.38)
+    cream, salmon, blue, green = (0.92, 0.76, 0.48), (0.92, 0.48, 0.36), (0.50, 0.70, 0.88), (0.55, 0.78, 0.52)
+    purple, orange, white, yellow = (0.75, 0.55, 0.80), (0.92, 0.62, 0.34), (0.88, 0.84, 0.76), (0.95, 0.80, 0.38)
+    roof_red, roof_brown = (0.58, 0.12, 0.08), (0.42, 0.20, 0.10)
 
-    roof_red = (0.58, 0.12, 0.08)
-    roof_brown = (0.42, 0.20, 0.10)
+    # --- CASAS CENTRALES (ENTRE LA PLAZA Y LAS CALLES LATERALES) ---r
+    
+    # Acera Central Izquierda (Mirando hacia el Norte, Calle Horizontal Norte Z = -12.25)
+    draw_house(-14.0, -8.5, cream, roof_red, rotation=270) #180
+    draw_house(-14.0, -3, blue, roof_brown, rotation=270) #180
+    
+    # Acera Central Derecha (Mirando hacia el Sur, Calle Horizontal Sur Z = 6.5)
+    draw_house(14.0, -8.5, salmon, roof_red, rotation=90) # salmon techo rojo llllll
+    draw_house(14.0, -3, green, roof_brown, rotation=90) # verde techo cafe llllllll
 
-    # Casas laterales simétricas cerca de la plaza.
-    draw_house(-12.5, -8.5, cream, roof_red, rotation=90)
-    draw_house(12.5, -8.5, salmon, roof_red, rotation=-90)
+    # Casas del extremo (Mirando hacia las calles horizontales)
+    draw_house(-14.0, 2, purple, roof_red, rotation=270) # good
+    draw_house(14.0, 2, orange, roof_red, rotation=90) # naranja techo rojo lllllllllll
 
-    draw_house(-12.5, -2.0, blue, roof_brown, rotation=90)
-    draw_house(12.5, -2.0, green, roof_brown, rotation=-90)
+    # --- BLOQUE NORTE (Detrás de la Calle Horizontal Norte Z = -12.25) ---
+    # Miran hacia el Sur (rotation=0), de frente a la calle de la iglesia
+    draw_house(-24.0, -16.5, white, roof_red, rotation=0, size=1.1)
+    draw_house(-14.5, -16.5, yellow, roof_brown, rotation=0)
+    draw_house(14.5, -16.5, yellow, roof_red, rotation=0, size=1.1)
+    draw_house(24.0, -16.5, white, roof_brown, rotation=0)
 
-    draw_house(-12.5, 4.5, purple, roof_red, rotation=90)
-    draw_house(12.5, 4.5, orange, roof_red, rotation=-90)
+    # --- BLOQUE SUR (Abajo de la Calle Horizontal Sur Z = 6.5) ---
+    # Miran hacia el Norte (rotation=180), de frente a la calle comercial
+    draw_house(-24.0, 11.5, green, roof_red, rotation=180)
+    draw_house(-15.5, 11.5, salmon, roof_brown, rotation=180)
+    draw_house(15.5, 11.5, blue, roof_red, rotation=180)
+    draw_house(24.0, 11.5, cream, roof_brown, rotation=180)
 
-    # Casas más externas.
-    draw_house(-23.0, -18.0, white, roof_red, rotation=0, size=1.1)
-    draw_house(-14.5, -21.5, yellow, roof_brown, rotation=0)
-
-    draw_house(23.0, -18.0, yellow, roof_red, rotation=0, size=1.1)
-    draw_house(14.5, -21.5, white, roof_brown, rotation=0)
-
-    draw_house(-24.0, 9.0, green, roof_red, rotation=180)
-    draw_house(-15.5, 12.0, salmon, roof_brown, rotation=180)
-
-    draw_house(24.0, 9.0, blue, roof_red, rotation=180)
-    draw_house(15.5, 12.0, cream, roof_brown, rotation=180)
-
-    # Tienditas cerca de la calle principal.
-    draw_store(-6.5, 10.5, (0.92, 0.68, 0.40), rotation=180)
-    draw_store(6.5, 10.5, (0.62, 0.78, 0.88), rotation=180)
+    # --- TIENDAS COMERCIALES ---
+    # Ubicadas simétricamente en el bloque sur, alineadas para no flotar ni tapar la calle
+    draw_store(-6.5, 12.0, (0.92, 0.68, 0.40), rotation=180)
+    draw_store(6.5, 12.0, (0.62, 0.78, 0.88), rotation=180)
 
 
 def draw_all_trees():
+    """Mueve los árboles a las banquetas y áreas verdes, liberando el asfalto por completo"""
     tree_positions = [
-        (-7, -8), (7, -8), (-6, 3), (6, 3),
-        (-20, -11), (-20, -5), (-20, 2), (-20, 8),
-        (20, -11), (20, -5), (20, 2), (20, 8),
-        (-29, -22), (-25, -12), (-28, 2), (-29, 14),
-        (29, -22), (25, -12), (28, 2), (29, 14),
-        (-8, -20), (8, -20), (-5, -24), (5, -24)
+        # Esquinas de vegetación fuera del asfalto de la plaza
+        (-10.0, -8.0), (10.0, -8.0), (-10.0, 3.0), (10.0, 3.0),
+        # Aceras residenciales izquierdas (Entre la acera de la calle lateral y las casas)
+        (-23.0, -11.0), (-23.0, -5.0), (-23.0, 2.0), (-23.0, 8.0),
+        # Aceras residenciales derechas
+        (23.0, -11.0), (23.0, -5.0), (23.0, 2.0), (23.0, 8.0),
+        # Alrededor de la Iglesia (Bloque norte)
+        (-29.0, -22.0), (-25.0, -12.0), (-28.0, 2.0), (-29.0, 14.0),
+        (29.0, -22.0), (25.0, -12.0), (28.0, 2.0), (29.0, 14.0),
+        # Protección perimetral de avenidas
+        (-10.0, -20.0), (10.0, -20.0), (-5.0, -24.0), (5.0, -24.0)
     ]
-
     for x, z in tree_positions:
         draw_tree(x, z, scale=1.0)
 
 
 def draw_all_lamps():
+    """Ubica los postes de luz exactamente en la orilla de las banquetas, sin pisar la calle"""
     lamp_positions = [
-        (-3.8, 8.0), (3.8, 8.0),
-        (-3.8, -13.0), (3.8, -13.0),
-        (-15.0, 6.0), (15.0, 6.0),
-        (-15.0, -15.0), (15.0, -15.0),
-        (-17.0, -24.0), (17.0, -24.0)
+        # Bordes peatonales de la plaza
+        (-7.8, 4.2), (7.8, 4.2),
+        (-7.8, -9.2), (7.8, -9.2),
+        # Esquinas de cruces viales en banquetas seguras
+        (-16.5, 4.0), (16.5, 4.0),
+        (-16.5, -14.0), (16.5, -14.0),
+        (-21.5, -24.0), (21.5, -24.0)
     ]
-
     for x, z in lamp_positions:
         draw_lamp_post(x, z)
+
 
 
 def draw_scene():
@@ -580,6 +845,11 @@ def draw_scene():
     draw_all_houses()
     draw_all_trees()
     draw_all_lamps()
+    draw_all_personas()
+    draw_all_gaviotas()
+    draw_all_vehiculos()  # Agrega el carro, patrulla, ambulancia y moto
+    draw_all_mascotas()   # Agrega los perritos
+    draw_all_nubes()     # Agrega las nubes al cielo
 
 
 # ============================================================
@@ -743,15 +1013,16 @@ def handle_mouse_event(event):
 # ============================================================
 
 def update_animation():
-    global fountain_angle
-    global water_bob
+    global fountain_angle, water_bob, wing_angle
 
     fountain_angle += 1.8
-
     if fountain_angle >= 360:
         fountain_angle = 0
 
     water_bob = math.sin(math.radians(fountain_angle * 2)) * 0.08
+    
+    # Animación de aleteo: oscila rápido entre -20 y 20 grados
+    wing_angle = math.sin(math.radians(fountain_angle * 5)) * 20.0
 
 
 # ============================================================
