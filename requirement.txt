@@ -1,2 +1,7 @@
 numpy
+mediapipe==0.10.21 
 opencv-python
+pygame
+PyOpenGL
+PyOpenGL_accelerate
+glfw
