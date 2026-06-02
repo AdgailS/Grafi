@@ -6,9 +6,6 @@ W, H = 800, 600
 FPS = 30
 DURATION = 60.0 
 
-angulos_up = [0.24, 0.21, 0.18, 0.15]
-angulos_down = [0.22, 0.19, 0.16, 0.13, 0.10]
-
 def clamp01(x): 
     return 0.0 if x < 0.0 else (1.0 if x > 1.0 else x)
 
@@ -22,16 +19,6 @@ def hsv_to_bgr(h, s, v):
 
 
 # TRANSFORMACIONES MATRICIALES
-def apply_dynamic_shear(img, angle_t):
-    """Aplica una deformación de corte (Shear) oscilante"""
-    factor = 0.15 * math.sin(angle_t)
-    M = np.float32([[1, factor, 0], [0, 1, 0]])
-    return cv2.warpAffine(img, M, (W, H))
-
-def affine_rotate(img, angle):
-    M = cv2.getRotationMatrix2D((W // 2, H // 2), angle, 1.0)
-    return cv2.warpAffine(img, M, (W, H))
-
 def affine_shear(img, amount):
     M = np.float32([[1, amount, 0], [0, 1, 0]])
     return cv2.warpAffine(img, M, (W, H))
@@ -308,7 +295,6 @@ def scene_glitch(img, t, scale=1.3):
     
 # ---- ESCENA 5: Estrella de 5 puntas ------
 def scene_final(img, t, scale=0.9): 
-    """Escena 6: Composición Elíptica (Flor) con Shear Dinámico y Orlas Periféricas Resaltadas"""
     background_radial(img, t, 140) 
     cx, cy = W // 2, H // 2
     R = int(120 * scale) 

@@ -1,6 +1,6 @@
 # TAREAS GRAFICACIÓN
 ---
-## Tarea 1. Imagen con puntillismo 
+# Tarea 1. Imagen con puntillismo 
 Mi idea principal fue hacer el dibujo de una flor de 5 petalos y para comenzar importé las librerías necesarias y cree la imagen de 500x500 pixeles
 
 ```
@@ -37,7 +37,7 @@ Al final, como en todos los ejercicios solo se muestra la imagen.
 
 ---
 
-## Tarea 2. Segmentación de Frutas usando Máscara HSV
+# Tarea 2. Segmentación de Frutas usando Máscara HSV
 
 ### Actividad 1: Exploración del Espacio HSV
 1. Seleccionar un color (rojo, verde o amarillo).
@@ -119,12 +119,37 @@ Responder de manera argumentada:
 4. ¿Qué limitaciones tiene la segmentación por color? Que tonos o colores similares se pueden confundir y contar como el mismo o por el contrario, una fruta con varias tonalidades la marcaba con espacios o huecos.
 
 ---
-## Tarea 3. Escalación de imagenes 
+# Tarea 3. Escalación de imagenes 
 
-** ESTÀ EL CODIGO, FALTA MD
+Para esta tarea, el objetivo era cambiar las dimensiones de una imagen (en este caso una manzana) de manera manual, sin usar `cv.resize`. 
+
+Decidí reducirla a una quinta parte de su tamaño original implementando un mapeo inverso para que no quedaran huecos ni píxeles vacíos en el resultado.
+
+Primero, calculé el tamaño que tendría la nueva imagen multiplicando las dimensiones originales por nuestra escala (1/5) y forzando el resultado a un número entero. Con eso creé un lienzo completamente negro con esas medidas.
+
+```python
+scale = 1/5
+sx, sy = int(x * scale), int(y * scale)
+scaled = np.zeros((sx, sy), dtype=np.uint8)
+```
+
+Para rellenar la nueva imagen, utilicé dos bucles for que recorren cada fila y columna del lienzo pequeño. 
+
+En lugar de pasar los píxeles de la imagen grande a la chica, lo hice al revés: calculé de qué coordenada original provenía cada celda dividiendo los índices actuales entre la escala. 
+
+Finalmente, con un if validé que esas coordenadas calculadas no se salieran del tamaño de la imagen original antes de copiar el tono de gris.
+
+```
+for i in range(sx):
+    for j in range(sy):
+        orig_x, orig_y = int(i / scale), int(j / scale)
+        if orig_x < x and orig_y < y:
+            scaled[i, j] = translated[orig_x, orig_y]
+```
+Al terminar el recorrido de los píxeles, la imagen escalada se muestra en la ventana final
 
 ---
-## Tarea 4. Animación con ecuaciones paramétricas 
+# Tarea 4. Animación con ecuaciones paramétricas 
 Para generar esta animación solo tomé como base el codigo que nos había proporcionado en los apuntes y busqué imagenes el google con los dibujos que se podrían realizar, donde encontré los datos para realizar el espirar y las flores, a las cuales solo les cambié los valores de a, b y k para realizar distintos tamaños y cambiar la cantidad de petalos. 
 
 ```
@@ -189,7 +214,7 @@ while True:
 ```
 ---
 
-## Tarea 5. Dibujo con ecuaciones paramétricas
+# Tarea 5. Dibujo con ecuaciones paramétricas
 Como dibujo decidí hacer el contorno de un pollito (me arrepentí), para el cual usé solo lineas y un circulo para el ojo. Mi trabajo principan fue dividir la imagen como una cuadrilla para saber donde iniciaba y terminba cada punto e ir uniendolos.
 ```
 import numpy as np
@@ -239,7 +264,7 @@ cv.destroyAllWindows()
 ```
 
 ---
-## Tarea 6. Ping Pong 
+# Tarea 6. Ping Pong 
 La idea del ejercicio era hacer que la pelota se mueva en (x,y) y que cuando se toque una pared se invierta la dirección para dar la ilusión de que rebota.
 Primero definí la posicion inicial para que sea el centro (x,y), la velocidad para cada uno (dx,dy) y el tamaño de la pelota
 ```
@@ -273,7 +298,7 @@ while True:
 ```
 
 ---
-## Tarea 7. Filtro con nariz, orejas, cejas y bigote 
+# Tarea 7. Filtro con nariz, orejas, cejas y bigote 
 
 En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo distintos elemtos para cada parte de la cara que queriá representar, usando lineas para las cejas, una elipse completa (-1) para la nariz, dos rin relleno para el bigote y otras dos rellenas para las orejas.
 
@@ -292,12 +317,65 @@ En base al codigo de ejemplo y siguiendo las mismas instrucciones agregué solo 
 ```
 ---
 
-## TAREA 8. Dibujo con perspectiva isometrica 
-*** ESTÀ EL CODIGO, FALTA MD
+# TAREA 8. Dibujo con perspectiva isometrica 
+La idea de este ejercicio era simular un espacio tridimensional sobre un plano en 2D utilizando proyecciones axonométricas. En lugar de dibujar un cubo estático, desarrollé una función interactiva que genera una casa en perspectiva oblicua/isométrica capaz de cambiar dinámicamente su ángulo de profundidad para crear un efecto de animación de cámaras.
+
+Para comenzar, importé las librerías necesarias y configuré una función llamada `dibujar_casa` que recibe el ángulo de vista en grados y calcula de manera matemática los desplazamientos en los ejes horizontales y verticales utilizando trigonometría básica. Esto define qué tanta profundidad proyectará el dibujo en el lienzo de 600x600 píxeles.
+
+```
+angulo_rad = math.radians(angulo_vista_grados)
+dx = int(profundidad * math.cos(angulo_rad))
+dy = int(profundidad * math.sin(angulo_rad))
+```
+
+Después, establecí los vértices base bidimensionales que forman la fachada de la casa (puntos A, B, C, D y el Pico_F para el tejado frontal). 
+
+Para proyectar la estructura en el espacio tridimensional, calculé los puntos de la parte trasera (E, F, G, H y Pico_T) sumándoles el desplazamiento dx en el plano horizontal y restándoles dy en el plano vertical para simular la elevación en perspectiva.
+
+``
+### Fachada frontal
+A = (200, 400)  
+B = (320, 400) 
+C = (320, 280)  
+D = (200, 280)  
+Pico_F = (260, 200) ``
+
+### Fachada trasera proyectada por desplazamiento trigonométrico
+```
+E = (A[0] + dx, A[1] - dy)
+F = (B[0] + dx, B[1] - dy)
+G = (C[0] + dx, C[1] - dy)
+H = (D[0] + dx, D[1] - dy)
+Pico_T = (Pico_F[0] + dx, Pico_F[1] - dy)
+```
+
+Para que el dibujo tuviera mayor realismo y volumen visual, utilicé la función cv.fillPoly de OpenCV para rellenar las superficies con una paleta de colores sólida diferenciada. Al asignar un tono específico para la pared frontal, uno ligeramente más oscuro para la pared lateral (simulando una zona de sombra) y otro para las dos secciones del tejado, se consigue engañar al ojo dando una sensación inmediata de volumen 3D.
+
+
+# Dibujo y relleno de caras sólidas para dar volumen
+```
+pts_frontal = np.array([A, B, C, D, Pico_F], np.int32)
+cv.fillPoly(casa, [pts_frontal], color_pared_frontal)
+
+pts_lateral = np.array([B, F, G, C], np.int32)
+cv.fillPoly(casa, [pts_lateral], color_pared_lateral)
+
+pts_techo = np.array([D, C, Pico_F], np.int32)
+cv.fillPoly(casa, [pts_techo], color_techo)
+
+pts_techo_lat = np.array([C, G, Pico_T, Pico_F], np.int32)
+cv.fillPoly(casa, [pts_techo_lat], color_techo)
+```
+
+Posteriormente, utilicé ciclos for y llamadas individuales a cv.line con un grosor de 2 píxeles y un color gris oscuro para trazar todas las aristas y contornos del sólido, uniendo la parte frontal con la trasera y delineando los remates del techo y el caballete principal (Pico_F hacia Pico_T).
+
+Finalmente, implementé un bucle que varía el ángulo de visualización desde los 10° hasta los 70° con pasos de 5° en 5°.
+
+ En cada iteración se borra el lienzo, se recalculan las posiciones isométricas con la nueva inclinación trigonométrica y se muestra en la ventana mediante cv.imshow, creando una animación fluida que simula un cambio de enfoque espacial en tiempo real.
  
+----
 
-
- ## TAREA 9. Dibujo de una flor que se escala 
+ # TAREA 9. Dibujo de una flor que se escala 
 
 Con el codigo de deteccion de manos visto en clase la intención es dibujar en el centro de la pantalla una flor que cambie de tamaño en relación a las distancias entre los dedos pulgar e indice detectados en la pantalla, por lo que hice que la funcion que dibuja la flor recibiera esta distancia y la multiplicara para que fuera mas nitido el dibujo: 
 
@@ -318,8 +396,8 @@ centro_x = int(w / 2)  # Mitad del ancho
 centro_y = int(h / 2)  # Mitad del alto
 dibujar_flor(frame, centro_x, centro_y, distancia)
 ```
-
-## TAREA 10. Vecindad usando GLUT
+---
+# TAREA 10. Vecindad usando GLUT
 
 Usando los codigos vistos en clase de como dibujar una casa y un arbol con formas GLUT solo tome el codigo de la vecindad y agregué ahí los bloques de codigo para dibujar arboles entre ellos, quedando algo así para el tronco:
 
